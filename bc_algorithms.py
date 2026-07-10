@@ -108,3 +108,14 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
     print(f"Iterations: {len(consensus_hist)}")
     print("True minimum: f(0,0) = 0")
+
+    print("NAIVE ALGORITHM RESULTS")
+    rng = np.random.default_rng(0) # set up seeded random num generator
+    lo, hi = -32, 32
+    x = rng.uniform(lo, hi, size=(50, 2))
+
+    x_naive, f_naive, iter_naive = naive(x, ackley)
+    print(f"Best x position found: {x_naive}")
+    print(f"Running Best f(x): {f_naive:.6f}")
+    print(f"Iterations: {iter_naive}")
+    print("True minimum: f(0,0) = 0")
