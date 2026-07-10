@@ -5,6 +5,7 @@ import matplotlib.colors as mcolors
 from bc_algorithms import ackley, cbo
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
+from variant_3 import random_mini_batch
 
 
 def grid(res):
@@ -39,18 +40,21 @@ def main():
     ax1 = fig.add_subplot(2,2,1)
     ax2 = fig.add_subplot(2,2,2)
     ax3 = fig.add_subplot(2,2,3)
-    # ax4 = fig.add_subplot(2,2,4)
+    ax4 = fig.add_subplot(2,2,4)
 
     # plot graphs
     _, _, _, _, _, _, cbo_var_hist = cbo(ackley, d=2, seed=0)
     _, _, _, _, _, _, var1_var_hist = component_wise_diff(ackley, d=2, seed=0)
     _, _, _, _, _, _, var2_var_hist = common_noise(ackley, d=2, seed=0)
+    _, _, _, _, _, _, var3_var_hist = random_mini_batch(ackley, d=2, seed=0)
     variance_hist(ax1, cbo_var_hist, len(cbo_var_hist))
     ax1.set_title("BC CBO Variance")
     variance_hist(ax2, var1_var_hist, len(var1_var_hist))
     ax2.set_title("VARIANT 1 Variance w/ Component-Wise Diffusion")
     variance_hist(ax3, var2_var_hist, len(var2_var_hist))
     ax3.set_title("VARIANT 2 Variance w/ Component-Wise Diffusion & Common Noise")
+    variance_hist(ax4, var3_var_hist, len(var3_var_hist))
+    ax4.set_title("VARIANT 3 Variance using Random Mini Batches")
 
 
     plt.tight_layout()

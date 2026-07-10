@@ -5,6 +5,7 @@ import matplotlib.colors as mcolors
 from bc_algorithms import ackley, cbo
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
+from variant_3 import random_mini_batch
 
 
 def grid(res):
@@ -52,18 +53,21 @@ def main():
     ax1 = fig.add_subplot(2,2,1)
     ax2 = fig.add_subplot(2,2,2)
     ax3 = fig.add_subplot(2,2,3)
-    # ax4 = fig.add_subplot(2,2,4)
+    ax4 = fig.add_subplot(2,2,4)
 
     # plot graphs
     _, _, _, cbo_part_hist, _, _, _ = cbo(ackley, d=2, seed=0)
     _, _, _, var1_part_hist, _, _, _ = component_wise_diff(ackley, d=2, seed=0)
     _, _, _, var2_part_hist, _, _, _ = common_noise(ackley, d=2, seed=0)
+    _, _, _, var3_part_hist, _, _, _ = random_mini_batch(ackley, d=2, seed=0)
     particle_hist(ax1, cbo_part_hist)
     ax1.set_title("BC CBO Particle Trajectories")
     particle_hist(ax2, var1_part_hist)
     ax2.set_title("VARIANT 1 Particle Trajectories w/ Component-Wise Diffusion")
     particle_hist(ax3, var2_part_hist)
     ax3.set_title("VARIANT 2 Particle Trajectories w/ Component-Wise Diffusion & Common Noise")
+    particle_hist(ax4, var3_part_hist)
+    ax4.set_title("VARIANT 3 Particle Trajectories using Random Mini Batches")
 
 
     plt.tight_layout()
