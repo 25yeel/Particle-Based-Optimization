@@ -8,17 +8,6 @@ from variant_2 import common_noise
 from variant_3 import random_mini_batch
 
 
-def grid(res):
-    # create grid
-    lin = np.linspace(-32, 32, res)
-    X, Y = np.meshgrid(lin, lin)
-    grid = np.stack([X.ravel(), Y.ravel()], axis=1)
-
-    # evaluate function at all grid points, correspond to grid coord
-    Z = ackley(grid).reshape(res, res)
-
-    return X, Y, Z
-
 # VARIANCE PLOT
 def variance_hist(ax, var_hist, n_iters):
     # plot x (iteration) and y (variance of particle distr)

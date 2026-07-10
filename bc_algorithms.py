@@ -18,12 +18,16 @@ def ackley(x): # x = (x_1, x_2, ..., x_n)
     return -a*np.exp(-b*np.sqrt(sum_sq)) - np.exp(sum_cos) + a + np.exp(1)
 
 # cbo on the first iteration
-def naive(x, f): # x = (x_1, x_2, ..., x_n)
+def naive(f):
+    rng = np.random.default_rng(0) # set up seeded random num generator
+    lo, hi = -32, 32
+    x = rng.uniform(lo, hi, size=(50, 2)) # x = (x_1, x_2, ..., x_n)
+
     f_vals = f(x)
     best_idx = np.argmin(f_vals) # index of lowest f val
 
     # return best part pos, best obj val, num of iterations
-    return x[best_idx], f_vals[best_idx], len(f_vals)
+    return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals))
 
 def consensus_point(x, f_vals, alpha):
     weights = np.exp(-alpha*f_vals) # weight function
@@ -109,13 +113,12 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print(f"Iterations: {len(consensus_hist)}")
     print("True minimum: f(0,0) = 0")
 
+    print("---------------------------------------")
     print("NAIVE ALGORITHM RESULTS")
-    rng = np.random.default_rng(0) # set up seeded random num generator
-    lo, hi = -32, 32
-    x = rng.uniform(lo, hi, size=(50, 2))
 
-    x_naive, f_naive, iter_naive = naive(x, ackley)
-    print(f"Best x position found: {x_naive}")
-    print(f"Running Best f(x): {f_naive:.6f}")
-    print(f"Iterations: {iter_naive}")
+    best_x_naive, best_val_naive, x_positions_naive, f_vals_naive, n_part_naive = naive(ackley)
+
+    print(f"Best x position found: {best_x_naive}")
+    print(f"Best f(x): {best_val_naive:.6f}")
+    print(f"Iterations: 0")
     print("True minimum: f(0,0) = 0")

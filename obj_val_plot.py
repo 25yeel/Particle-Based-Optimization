@@ -2,22 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-from bc_algorithms import ackley, cbo
+from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
 
-
-def grid(res):
-    # create grid
-    lin = np.linspace(-32, 32, res)
-    X, Y = np.meshgrid(lin, lin)
-    grid = np.stack([X.ravel(), Y.ravel()], axis=1)
-
-    # evaluate function at all grid points, correspond to grid coord
-    Z = ackley(grid).reshape(res, res)
-
-    return X, Y, Z
 
 # best f(x) found SO FAR over iterations
 def best_obj_val_hist(ax, best_val_hist, best_val):
@@ -53,6 +42,14 @@ def consensus_hist(ax, consensus_hist):
     ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
 
+def obj_val_naive(ax):
+    best_x, best_val, x_positions, f_vals, n_particles = naive(ackley)
+    # draw horizontal line to compare best_val to other graphs
+    ax.axhline(y=best_val, color="#D85A30", linestyle="--", linewidth=1, label=(f"Best f val: {best_val:.4f}"))
+    ax.set_title("NAIVE ALGORITHM Best f(x)")
+    ax.set_xlabel("Iteration"); ax.set_ylabel("Best f(x) found")
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.3, which="both")
 
 
 def main():
@@ -61,18 +58,21 @@ def main():
     fig.suptitle("CBO on the 2D Ackley Function", fontsize=14, fontweight="bold")
 
     # 2x2 figure panels
-    ax1 = fig.add_subplot(4,3,1)
-    ax2 = fig.add_subplot(4,3,2)
-    ax3 = fig.add_subplot(4,3,3)
-    ax4 = fig.add_subplot(4,3,4)
-    ax5 = fig.add_subplot(4,3,5)
-    ax6 = fig.add_subplot(4,3,6)
-    ax7 = fig.add_subplot(4,3,7)
-    ax8 = fig.add_subplot(4,3,8)
-    ax9 = fig.add_subplot(4,3,9)
-    ax10 = fig.add_subplot(4,3,10)
-    ax11 = fig.add_subplot(4,3,11)
-    ax12 = fig.add_subplot(4,3,12)
+    ax1 = fig.add_subplot(5,3,1)
+    ax2 = fig.add_subplot(5,3,2)
+    ax3 = fig.add_subplot(5,3,3)
+    ax4 = fig.add_subplot(5,3,4)
+    ax5 = fig.add_subplot(5,3,5)
+    ax6 = fig.add_subplot(5,3,6)
+    ax7 = fig.add_subplot(5,3,7)
+    ax8 = fig.add_subplot(5,3,8)
+    ax9 = fig.add_subplot(5,3,9)
+    ax10 = fig.add_subplot(5,3,10)
+    ax11 = fig.add_subplot(5,3,11)
+    ax12 = fig.add_subplot(5,3,12)
+    ax13 = fig.add_subplot(5,3,13)
+    # ax14 = fig.add_subplot(5,3,14)
+    # ax15 = fig.add_subplot(5,3,15)
 
     _, cbo_best_val, cbo_consensus_hist, _, cbo_obj_val_hist, cbo_best_val_hist, _ = cbo(ackley, d=2, seed=0)
     _, var1_best_val, var1_consensus_hist, _, var1_obj_val_hist, var1_best_val_hist, _ = component_wise_diff(ackley, d=2, seed=0)
@@ -89,6 +89,7 @@ def main():
     ax7.set_title("VARIANT 2 Running Best f(x) over iterations")
     best_obj_val_hist(ax10, var3_best_val_hist, var3_best_val)
     ax10.set_title("VARIANT 3 Running Best f(x) over iterations")
+    obj_val_naive(ax13)
 
     # obj value history
     obj_val_hist(ax2, cbo_obj_val_hist)

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
-from bc_algorithms import ackley, cbo
+from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
@@ -35,7 +35,7 @@ def particle_hist(ax, particle_hist):
         ax.plot(x_1, x_2, color="white", alpha=0.15, linewidth=1.0)
     # plot individual points at iteration 0
     ax.scatter(particle_hist[0,:,0], particle_hist[0,:,1], color="orange", s=12, zorder=3, label="Start")
-    # plot individual points at iteration 1
+    # plot individual points at last iteration
     ax.scatter(particle_hist[-1,:,0], particle_hist[-1,:,1], color="red", s=12, zorder=3, label="End")
 
     # styling
@@ -44,22 +44,40 @@ def particle_hist(ax, particle_hist):
     ax.set_xlim(-32, 32); ax.set_ylim(-32, 32)
     ax.legend(fontsize=7, loc="upper right")
 
+# NAIVE POINT PLOT
+def naive_part_plot(ax):
+    _, _, Z = grid(res=300)
+    # draw 2d array heatmap
+    ax.imshow(Z, extent=[-32, 32, -32, 32], origin="lower", cmap="Blues", aspect="equal", norm=mcolors.PowerNorm(gamma=0.4,vmin=0,vmax=22))
+
+    best_x, best_val, x_positions, f_vals, n_particles = naive(ackley)
+    ax.scatter(x_positions[:,0], x_positions[:,1], color="orange", s=12) # plot individual points
+    ax.scatter(best_x[0], best_x[1], color="red", s=12, label="min f(x)")
+
+    ax.set_title("NAIVE ALGORITHM Particle Positions")
+    ax.set_xlabel("x_1"); ax.set_ylabel("x_2")
+    ax.set_xlim(-32, 32); ax.set_ylim(-32, 32)
+
+
 def main():
     # create blank canvas
     fig = plt.figure(figsize=(13,10))
     fig.suptitle("CBO on the 2D Ackley Function", fontsize=14, fontweight="bold")
 
     # 2x2 figure panels
-    ax1 = fig.add_subplot(2,2,1)
-    ax2 = fig.add_subplot(2,2,2)
-    ax3 = fig.add_subplot(2,2,3)
-    ax4 = fig.add_subplot(2,2,4)
+    ax1 = fig.add_subplot(3,2,1)
+    ax2 = fig.add_subplot(3,2,2)
+    ax3 = fig.add_subplot(3,2,3)
+    ax4 = fig.add_subplot(3,2,4)
+    ax5 = fig.add_subplot(3,2,5)
 
     # plot graphs
+
     _, _, _, cbo_part_hist, _, _, _ = cbo(ackley, d=2, seed=0)
     _, _, _, var1_part_hist, _, _, _ = component_wise_diff(ackley, d=2, seed=0)
     _, _, _, var2_part_hist, _, _, _ = common_noise(ackley, d=2, seed=0)
     _, _, _, var3_part_hist, _, _, _ = random_mini_batch(ackley, d=2, seed=0)
+
     particle_hist(ax1, cbo_part_hist)
     ax1.set_title("BC CBO Particle Trajectories")
     particle_hist(ax2, var1_part_hist)
@@ -69,6 +87,7 @@ def main():
     particle_hist(ax4, var3_part_hist)
     ax4.set_title("VARIANT 3 Particle Trajectories using Random Mini Batches")
 
+    naive_part_plot(ax5)
 
     plt.tight_layout()
     plt.savefig("trajectories_plot.png", dpi=150)
