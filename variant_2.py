@@ -81,6 +81,6 @@ if __name__ == "__main__": # runs when this is the main file of this execution
 
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
-    print(f"Ending/Best f(x): {obj_val_hist[-1]}")
+    print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
     print(f"Iterations: {len(consensus_hist)}")
     print("True minimum: f(0,0) = 0")

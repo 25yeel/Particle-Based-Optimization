@@ -36,7 +36,7 @@ def random_mini_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0,
         f_batch = f(x_batch) # obj values of batch
 
         # Consensus history
-        c = consensus_point(x, f_batch, alpha) # consensus point evaluated from mini batch only
+        c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only
         consensus_hist.append(c.copy())
 
         f_vals = f(x) # re-run ackley every iteration
@@ -73,3 +73,14 @@ def random_mini_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0,
     best_idx = np.argmin(f_vals)
 
     return (x[best_idx], best_val_hist[-1], np.array(consensus_hist), np.array(particle_hist), np.array(obj_val_hist), np.array(best_val_hist), np.array(variance_hist))
+
+if __name__ == "__main__": # runs when this is the main file of this execution
+    print("CBO VARIANT 3")
+
+    best_x, running_best, consensus_hist, _, obj_val_hist, _, _ = random_mini_batch(ackley, d=2, seed=0)
+
+    print(f"Best x position found: {best_x}")
+    print(f"Running Best f(x): {running_best:.6f}")
+    print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
+    print(f"Iterations: {len(consensus_hist)}")
+    print("True minimum: f(0,0) = 0")
