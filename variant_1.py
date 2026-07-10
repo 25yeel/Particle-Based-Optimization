@@ -1,6 +1,7 @@
 import numpy as np
 from bc_algorithms import ackley, consensus_point, cbo
 
+# Variant 1 in Totzeck CBO: Component-wise diffusion
 def component_wise_diff(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, dt=0.05, max_iters=500, tol=1e-5, seed=0):
     """ same drift as original cbo scheme, but now the diffusion is component-wise
         or adjusted for each particle individually"""

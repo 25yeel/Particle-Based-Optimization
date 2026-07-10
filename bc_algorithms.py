@@ -96,7 +96,6 @@ def cbo(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, d
     f_vals = f(x) # obj vals at last iteration
     best_idx = np.argmin(f_vals)
 
-
     return (x[best_idx], best_val_hist[-1], np.array(consensus_hist), np.array(particle_hist), np.array(obj_val_hist), np.array(best_val_hist), np.array(variance_hist))
 
 if __name__ == "__main__": # runs when this is the main file of this execution
