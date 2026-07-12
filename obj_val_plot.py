@@ -11,7 +11,7 @@ from variant_3 import random_mini_batch
 # best f(x) found SO FAR over iterations
 def best_obj_val_hist(ax, best_val_hist, best_val):
     # plot x (iteration) and y (obj value)
-    ax.semilogy(best_val_hist, color="#1D9E75", linewidth=1.8)
+    ax.semilogy(best_val_hist, color="#1D9E75", linewidth=1.4)
     # draw horizontal y line to show where run ended up
     ax.axhline(y=best_val, color="#D85A30", linestyle="--", linewidth=1, label=(f"Final best: {best_val:.4f}"))
 
@@ -23,7 +23,7 @@ def best_obj_val_hist(ax, best_val_hist, best_val):
 # best f(x) during each iteration
 def obj_val_hist(ax, obj_val_hist):
     # plot x (iteration) and y (obj value)
-    ax.semilogy(obj_val_hist, color="blue", linewidth=1.8)
+    ax.semilogy(obj_val_hist, color="blue", linewidth=1.4)
     # draw horizontal y line to show where run ended up
     ax.axhline(y=obj_val_hist[-1], color="#D83030", linestyle="--", linewidth=1, label=(f"Final best: {obj_val_hist[-1]:.4f}"))
 
@@ -34,7 +34,7 @@ def obj_val_hist(ax, obj_val_hist):
 # consensus point history over iterations
 def consensus_hist(ax, consensus_hist):
     consensus_vals = ackley(consensus_hist)
-    ax.semilogy(consensus_vals, color="#06BF15", linewidth=1.8)
+    ax.semilogy(consensus_vals, color="#06BF15", linewidth=1.4)
     # draw horizontal y line to show where run ended up
     ax.axhline(y=consensus_vals[-1], color="#591766", linestyle="--", linewidth=1, label=(f"Final best: {consensus_vals[-1]:.4f}"))
 
@@ -43,9 +43,9 @@ def consensus_hist(ax, consensus_hist):
     ax.grid(alpha=0.3, which="both")
 
 def obj_val_naive(ax):
-    best_x, best_val, x_positions, f_vals, n_particles = naive(ackley)
+    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley)
     # draw horizontal line to compare best_val to other graphs
-    ax.axhline(y=best_val, color="#D85A30", linestyle="--", linewidth=1, label=(f"Best f val: {best_val:.4f}"))
+    ax.axhline(y=best_val, color="#1D9E75", linestyle="-", linewidth=1.4, label=(f"Best f val: {best_val:.4f}"))
     ax.set_title("NAIVE ALGORITHM Best f(x)")
     ax.set_xlabel("Iteration"); ax.set_ylabel("Best f(x) found")
     ax.legend(fontsize=8)
