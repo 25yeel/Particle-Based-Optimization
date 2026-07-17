@@ -43,7 +43,7 @@ def consensus_hist(ax, consensus_hist):
     ax.grid(alpha=0.3, which="both")
 
 def obj_val_naive(ax):
-    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley)
+    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley, d=2)
     # draw horizontal line to compare best_val to other graphs
     ax.axhline(y=best_val, color="#1D9E75", linestyle="-", linewidth=1.4, label=(f"Best f val: {best_val:.4f}"))
     ax.set_title("NAIVE ALGORITHM Best f(x)")

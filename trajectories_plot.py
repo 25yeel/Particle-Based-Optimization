@@ -50,8 +50,8 @@ def naive_part_plot(ax):
     # draw 2d array heatmap
     ax.imshow(Z, extent=[-32, 32, -32, 32], origin="lower", cmap="Blues", aspect="equal", norm=mcolors.PowerNorm(gamma=0.4,vmin=0,vmax=22))
 
-    best_x, best_val, x_positions, f_vals, n_particles = naive(ackley)
-    ax.scatter(x_positions[:,0], x_positions[:,1], color="orange", s=12) # plot individual points
+    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley, d=2)
+    ax.scatter(x_positions[:,0], x_positions[:,1], color="orange", s=0.5) # plot individual points
     ax.scatter(best_x[0], best_x[1], color="red", s=12, label="min f(x)")
 
     ax.set_title("NAIVE ALGORITHM Particle Positions")
