@@ -17,6 +17,71 @@ def ackley(x): # x = (x_1, x_2, ..., x_n)
     # return result of Ackley function (np array of values)
     return -a*np.exp(-b*np.sqrt(sum_sq)) - np.exp(sum_cos) + a + np.exp(1)
 
+def rastrigin(x, B=0.0, C=0.0): # x = (x_1, x_2, ..., x_n)
+    # B = argmin L(x); C = min L(x)
+
+    shifted = x - B
+    d = shifted.shape[-1] # d = dimension
+    terms = shifted**2 - 10*np.cos(2*np.pi*shifted) + 10
+
+    # return result of Rastrigin function (np array of values)
+    return terms.sum(axis=-1) / d + C
+
+def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, seed=0):
+    """ γ = learning rate/step size """
+    rng = np.random.default_rng(seed) # draw random starting pts (1 per simulation)
+    lo, hi = domain
+    x = rng.uniform(lo, hi, size=(n_sims, d))
+    epochs = 1e-6
+
+    # HISTORY PLOTS
+    # store best f(x) value at each iteration
+    obj_val_hist = []
+    # store RUNNING BEST f(x) value at each iteration
+    best_val_hist = []
+    running_best = np.inf
+
+    """***"""
+    active = np.ones(n_sims, dtype=bool)
+
+    for _ in range(max_iters):
+        # compute gradient numerically
+        grad = np.zeros_like(x)
+        for i in range(d): # one dim at a time
+            x_plus = x.copy(); x_minus = x.copy()
+            x_plus[:, i] += epochs
+            x_minus[:, i] -= epochs
+            grad[:, i] = (f(x_plus) - f(x_minus)) / (2*epochs) # approximate ∂f/∂xi
+
+        step = lr*grad # scale gradient by learning rate
+        x_new = x.copy()
+        x_new[active] = x[active] - step[active]  # gradient descent step
+
+        f_vals = f(x_new)
+
+        # Obj val history
+        obj_val_hist.append(f_vals.min())
+
+        # Best obj val history
+        running_best = min(running_best, f_vals.min())
+        best_val_hist.append(running_best)
+
+        # Freeze trajectories once they stop moving
+        step_size = np.linalg.norm(x_new - x, axis=1)
+        active = active & (step_size >= tol)
+
+        x = x_new # update
+
+        if not active.any():
+            break
+
+
+    f_vals = f(x)
+    best_idx = np.argmin(f_vals)
+
+    return (x[best_idx], best_val_hist[-1], np.array(x), np.array(f_vals), np.array(obj_val_hist), np.array(best_val_hist))
+
+
 def consensus_point(x, f_vals, alpha):
     weights = np.exp(-alpha*f_vals) # weight function
     weights = weights / weights.sum() # weigh each particle accordingly
