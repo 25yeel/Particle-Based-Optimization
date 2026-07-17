@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
 
 from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
@@ -21,13 +22,14 @@ def grid(res):
     return X, Y, Z
 
 # TRAJECTORY PLOT
-def particle_hist(ax, particle_hist):
+def particle_hist(ax, particle_hist, m_size=50):
     _, _, Z = grid(res=300)
 
     # draw 2d array heatmap
     ax.imshow(Z, extent=[-32, 32, -32, 32], origin="lower", cmap="Blues", aspect="equal", norm=mcolors.PowerNorm(gamma=0.4,vmin=0,vmax=22))
 
     n_particles = particle_hist.shape[1]
+    n_iters = len(particle_hist)
 
     for i in range(n_particles):
         traj = particle_hist[:,i,:] # draw one trajectory line per particle
@@ -43,7 +45,12 @@ def particle_hist(ax, particle_hist):
     # ax.set_title("Particle Trajectories")
     ax.set_xlabel("x_1"); ax.set_ylabel("x_2")
     ax.set_xlim(-32, 32); ax.set_ylim(-32, 32)
-    ax.legend(fontsize=7, loc="upper right")
+
+    # add info patches to legend
+    handles, labels = ax.get_legend_handles_labels()
+    info1 = mpatches.Patch(color='none', label=f'NFE: {m_size*n_iters}')
+    info2 = mpatches.Patch(color='none', label=f'N: {n_particles}')
+    ax.legend(handles=handles + [info1, info2], fontsize=8, loc="upper right")
 
 # NAIVE POINT PLOT
 def naive_part_plot(ax):
@@ -58,6 +65,11 @@ def naive_part_plot(ax):
     ax.set_title("NAIVE ALGORITHM Particle Positions")
     ax.set_xlabel("x_1"); ax.set_ylabel("x_2")
     ax.set_xlim(-32, 32); ax.set_ylim(-32, 32)
+    # add info patches to legend
+    handles, labels = ax.get_legend_handles_labels()
+    info1 = mpatches.Patch(color='none', label=f'NFE: {n_particles}')
+    info2 = mpatches.Patch(color='none', label=f'N: {n_particles}')
+    ax.legend(handles=handles + [info1, info2], fontsize=8, loc="upper right")
 
 
 def main():
@@ -87,9 +99,9 @@ def main():
     ax2.set_title("VARIANT 1: Particle Trajectories w/ Component-Wise Diffusion")
     particle_hist(ax3, var2_part_hist)
     ax3.set_title("VARIANT 2: Particle Trajectories w/ Component-Wise Diffusion & Common Noise")
-    particle_hist(ax4, var3_part_hist)
+    particle_hist(ax4, var3_part_hist, m_size=10)
     ax4.set_title("VARIANT 3: Particle Trajectories using Random Mini Batches")
-    particle_hist(ax5, var13_part_hist)
+    particle_hist(ax5, var13_part_hist, m_size=10)
     ax5.set_title("VARIANT 1+3: Particle Trajectories w/ Component-Wise Diffusion using Random Batching")
 
     naive_part_plot(ax6)
