@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
 
 from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
@@ -10,7 +11,7 @@ from variant_1and3 import comp_diff_random_batch
 
 
 # best f(x) found SO FAR over iterations
-def best_obj_val_hist(ax, best_val_hist, best_val):
+def best_obj_val_hist(ax, best_val_hist, best_val, n_particles=50, m_size=50):
     # plot x (iteration) and y (obj value)
     ax.semilogy(best_val_hist, color="#1D9E75", linewidth=1.4)
     # draw horizontal y line to show where run ended up
@@ -18,22 +19,38 @@ def best_obj_val_hist(ax, best_val_hist, best_val):
 
     # ax.set_title("Best f(x) over iterations")
     ax.set_xlabel("Iteration"); ax.set_ylabel("Best f(x) found SO FAR")
-    ax.legend(fontsize=8)
+    # ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
 
+    # get the existing plot handles automatically
+    handles, labels = ax.get_legend_handles_labels()
+
+    # add info patches to legend
+    info1 = mpatches.Patch(color='none', label=f'NFE: {m_size * len(best_val_hist)}')
+    info2 = mpatches.Patch(color='none', label=f'N: {n_particles}')
+    info3 = mpatches.Patch(color='none', label=f'M: {m_size}')
+    ax.legend(handles=handles + [info1, info2, info3], fontsize=8)
+
 # best f(x) during each iteration
-def obj_val_hist(ax, obj_val_hist):
+def obj_val_hist(ax, obj_val_hist, n_particles=50, m_size=50):
     # plot x (iteration) and y (obj value)
     ax.semilogy(obj_val_hist, color="blue", linewidth=1.4)
     # draw horizontal y line to show where run ended up
     ax.axhline(y=obj_val_hist[-1], color="#D83030", linestyle="--", linewidth=1, label=(f"Final best: {obj_val_hist[-1]:.4f}"))
 
     ax.set_xlabel("Iteration"); ax.set_ylabel("Best f(x) found")
-    ax.legend(fontsize=8)
+    # ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
 
+    # add info patches to legend
+    handles, labels = ax.get_legend_handles_labels()
+    info1 = mpatches.Patch(color='none', label=f'NFE: {m_size*len(obj_val_hist)}')
+    info2 = mpatches.Patch(color='none', label=f'N: {n_particles}')
+    info3 = mpatches.Patch(color='none', label=f'M: {m_size}')
+    ax.legend(handles=handles + [info1, info2, info3], fontsize=8)
+
 # consensus point history over iterations
-def consensus_hist(ax, consensus_hist):
+def consensus_hist(ax, consensus_hist, n_particles=50, m_size=50):
     consensus_vals = ackley(consensus_hist)
     ax.semilogy(consensus_vals, color="#06BF15", linewidth=1.4)
     # draw horizontal y line to show where run ended up
@@ -43,19 +60,32 @@ def consensus_hist(ax, consensus_hist):
     ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
 
+    # add info patches to legend
+    handles, labels = ax.get_legend_handles_labels()
+    info1 = mpatches.Patch(color='none', label=f'NFE: {m_size*len(consensus_hist)}')
+    info2 = mpatches.Patch(color='none', label=f'N: {n_particles}')
+    info3 = mpatches.Patch(color='none', label=f'M: {m_size}')
+    ax.legend(handles=handles + [info1, info2, info3], fontsize=8)
+
 def obj_val_naive(ax):
     best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley, d=2)
     # draw horizontal line to compare best_val to other graphs
     ax.axhline(y=best_val, color="#1D9E75", linestyle="-", linewidth=1.4, label=(f"Best f val: {best_val:.4f}"))
     ax.set_title("NAIVE ALGORITHM Best f(x)")
     ax.set_xlabel("Iteration"); ax.set_ylabel("Best f(x) found")
-    ax.legend(fontsize=8)
+    # ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
+
+    # add info patches to legend
+    handles, labels = ax.get_legend_handles_labels()
+    info1 = mpatches.Patch(color='none', label=f'NFE: {n_particles}')
+    info2 = mpatches.Patch(color='none', label=f'N: {n_particles}')
+    ax.legend(handles=handles + [info1, info2], fontsize=8)
 
 
 def main():
     # create blank canvas
-    fig = plt.figure(figsize=(15,12))
+    fig = plt.figure(figsize=(15,15))
     fig.suptitle("CBO on the 2D Ackley Function", fontsize=14, fontweight="bold")
 
     # 2x2 figure panels
@@ -91,9 +121,9 @@ def main():
     ax4.set_title("VARIANT 1 Running Best f(x) over iterations")
     best_obj_val_hist(ax7, var2_best_val_hist, var2_best_val)
     ax7.set_title("VARIANT 2 Running Best f(x) over iterations")
-    best_obj_val_hist(ax10, var3_best_val_hist, var3_best_val)
+    best_obj_val_hist(ax10, var3_best_val_hist, var3_best_val, m_size=10)
     ax10.set_title("VARIANT 3 Running Best f(x) over iterations")
-    best_obj_val_hist(ax13, var13_best_val_hist, var13_best_val)
+    best_obj_val_hist(ax13, var13_best_val_hist, var13_best_val, m_size=10)
     ax13.set_title("VARIANT 1+3 Running Best f(x) over iterations")
     obj_val_naive(ax16)
 
@@ -104,9 +134,9 @@ def main():
     ax5.set_title("VARIANT 1 Best f(x) over iterations")
     obj_val_hist(ax8, var2_obj_val_hist)
     ax8.set_title("VARIANT 2 Best f(x) over iterations")
-    obj_val_hist(ax11, var3_obj_val_hist)
+    obj_val_hist(ax11, var3_obj_val_hist, m_size=10)
     ax11.set_title("VARIANT 3 Best f(x) over iterations")
-    obj_val_hist(ax14, var13_obj_val_hist)
+    obj_val_hist(ax14, var13_obj_val_hist, m_size=10)
     ax14.set_title("VARIANT 1+3 Best f(x) over iterations")
 
     # consensus point history
@@ -116,9 +146,9 @@ def main():
     ax6.set_title("VARIANT 1 Consensus point over iterations")
     consensus_hist(ax9, var2_consensus_hist)
     ax9.set_title("VARIANT 2 Consensus point over iterations")
-    consensus_hist(ax12, var3_consensus_hist)
+    consensus_hist(ax12, var3_consensus_hist, m_size=10)
     ax12.set_title("VARIANT 3 Consensus point over iterations")
-    consensus_hist(ax15, var13_consensus_hist)
+    consensus_hist(ax15, var13_consensus_hist, m_size=10)
     ax15.set_title("VARIANT 1+3 Consensus point over iterations")
 
 
