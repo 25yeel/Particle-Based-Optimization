@@ -57,7 +57,7 @@ def consensus_hist(ax, consensus_hist, n_particles=50, m_size=50):
     ax.axhline(y=consensus_vals[-1], color="#591766", linestyle="--", linewidth=1, label=(f"Final best: {consensus_vals[-1]:.4f}"))
 
     ax.set_xlabel("Iteration"); ax.set_ylabel("Consensus point found")
-    ax.legend(fontsize=8)
+    # ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
 
     # add info patches to legend
