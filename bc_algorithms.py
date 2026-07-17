@@ -93,11 +93,11 @@ def cbo(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, d
 def naive(f, d, domain=(-32,32), n_particles=50):
     _, _, consensus_hist, _, _, _, _ = cbo(f, d)
     n_iters = len(consensus_hist)
+    NFE_comp_cost = n_particles * n_iters
 
     rng = np.random.default_rng(0) # set up seeded random num generator
     lo, hi = domain
-    comp_cost = n_particles * n_iters
-    x = rng.uniform(lo, hi, size=(comp_cost, d)) # x = (x_1, x_2, ..., x_n)
+    x = rng.uniform(lo, hi, size=(NFE_comp_cost, d)) # x = (x_1, x_2, ..., x_n)
 
     f_vals = f(x)
     best_idx = np.argmin(f_vals) # index of lowest f val
