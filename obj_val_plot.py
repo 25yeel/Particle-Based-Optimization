@@ -6,6 +6,7 @@ from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
+from variant_1and3 import comp_diff_random_batch
 
 
 # best f(x) found SO FAR over iterations
@@ -58,26 +59,29 @@ def main():
     fig.suptitle("CBO on the 2D Ackley Function", fontsize=14, fontweight="bold")
 
     # 2x2 figure panels
-    ax1 = fig.add_subplot(5,3,1)
-    ax2 = fig.add_subplot(5,3,2)
-    ax3 = fig.add_subplot(5,3,3)
-    ax4 = fig.add_subplot(5,3,4)
-    ax5 = fig.add_subplot(5,3,5)
-    ax6 = fig.add_subplot(5,3,6)
-    ax7 = fig.add_subplot(5,3,7)
-    ax8 = fig.add_subplot(5,3,8)
-    ax9 = fig.add_subplot(5,3,9)
-    ax10 = fig.add_subplot(5,3,10)
-    ax11 = fig.add_subplot(5,3,11)
-    ax12 = fig.add_subplot(5,3,12)
-    ax13 = fig.add_subplot(5,3,13)
-    # ax14 = fig.add_subplot(5,3,14)
-    # ax15 = fig.add_subplot(5,3,15)
+    ax1 = fig.add_subplot(6,3,1)
+    ax2 = fig.add_subplot(6,3,2)
+    ax3 = fig.add_subplot(6,3,3)
+    ax4 = fig.add_subplot(6,3,4)
+    ax5 = fig.add_subplot(6,3,5)
+    ax6 = fig.add_subplot(6,3,6)
+    ax7 = fig.add_subplot(6,3,7)
+    ax8 = fig.add_subplot(6,3,8)
+    ax9 = fig.add_subplot(6,3,9)
+    ax10 = fig.add_subplot(6,3,10)
+    ax11 = fig.add_subplot(6,3,11)
+    ax12 = fig.add_subplot(6,3,12)
+    ax13 = fig.add_subplot(6,3,13)
+    ax14 = fig.add_subplot(6,3,14)
+    ax15 = fig.add_subplot(6,3,15)
+    ax16 = fig.add_subplot(6,3,16)
+
 
     _, cbo_best_val, cbo_consensus_hist, _, cbo_obj_val_hist, cbo_best_val_hist, _ = cbo(ackley, d=2, seed=0)
     _, var1_best_val, var1_consensus_hist, _, var1_obj_val_hist, var1_best_val_hist, _ = component_wise_diff(ackley, d=2, seed=0)
     _, var2_best_val, var2_consensus_hist, _, var2_obj_val_hist, var2_best_val_hist, _ = common_noise(ackley, d=2, seed=0)
     _, var3_best_val, var3_consensus_hist, _, var3_obj_val_hist, var3_best_val_hist, _ = random_mini_batch(ackley, d=2, seed=0)
+    _, var13_best_val, var13_consensus_hist, _, var13_obj_val_hist, var13_best_val_hist, _ = comp_diff_random_batch(ackley, d=2, seed=0)
 
     # plot graphs
     # running best obj val history
@@ -89,7 +93,9 @@ def main():
     ax7.set_title("VARIANT 2 Running Best f(x) over iterations")
     best_obj_val_hist(ax10, var3_best_val_hist, var3_best_val)
     ax10.set_title("VARIANT 3 Running Best f(x) over iterations")
-    obj_val_naive(ax13)
+    best_obj_val_hist(ax13, var13_best_val_hist, var13_best_val)
+    ax13.set_title("VARIANT 1+3 Running Best f(x) over iterations")
+    obj_val_naive(ax16)
 
     # obj value history
     obj_val_hist(ax2, cbo_obj_val_hist)
@@ -100,6 +106,8 @@ def main():
     ax8.set_title("VARIANT 2 Best f(x) over iterations")
     obj_val_hist(ax11, var3_obj_val_hist)
     ax11.set_title("VARIANT 3 Best f(x) over iterations")
+    obj_val_hist(ax14, var13_obj_val_hist)
+    ax14.set_title("VARIANT 1+3 Best f(x) over iterations")
 
     # consensus point history
     consensus_hist(ax3, cbo_consensus_hist)
@@ -110,6 +118,8 @@ def main():
     ax9.set_title("VARIANT 2 Consensus point over iterations")
     consensus_hist(ax12, var3_consensus_hist)
     ax12.set_title("VARIANT 3 Consensus point over iterations")
+    consensus_hist(ax15, var13_consensus_hist)
+    ax15.set_title("VARIANT 1+3 Consensus point over iterations")
 
 
     plt.tight_layout()
