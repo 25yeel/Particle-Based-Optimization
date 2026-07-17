@@ -6,6 +6,7 @@ from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
+from variant_1and3 import comp_diff_random_batch
 
 
 # VARIANCE PLOT
@@ -21,7 +22,7 @@ def variance_hist(ax, var_hist, n_iters):
     ax.grid(alpha=0.3, which="both")
 
 def variance_naive(ax):
-    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley)
+    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley, d=2)
     # draw horizontal line to compare best_val to other graphs
     ax.axhline(y=variance, color="#5A6DD8", linestyle="-", linewidth=1.8, label=("No iterations"))
     ax.set_title("NAIVE ALGORITHM Variance")
@@ -40,13 +41,15 @@ def main():
     ax3 = fig.add_subplot(3,2,3)
     ax4 = fig.add_subplot(3,2,4)
     ax5 = fig.add_subplot(3,2,5)
+    ax6 = fig.add_subplot(3,2,6)
 
     # plot graphs
     _, _, _, _, _, _, cbo_var_hist = cbo(ackley, d=2, seed=0)
     _, _, _, _, _, _, var1_var_hist = component_wise_diff(ackley, d=2, seed=0)
     _, _, _, _, _, _, var2_var_hist = common_noise(ackley, d=2, seed=0)
     _, _, _, _, _, _, var3_var_hist = random_mini_batch(ackley, d=2, seed=0)
-    _, _, _, _, _, naive_var = naive(ackley)
+    _, _, _, _, _, _, var13_var_hist = comp_diff_random_batch(ackley, d=2, seed=0)
+    _, _, _, _, _, naive_var = naive(ackley, d=2)
 
     variance_hist(ax1, cbo_var_hist, len(cbo_var_hist))
     ax1.set_title("BC CBO Variance")
@@ -56,7 +59,10 @@ def main():
     ax3.set_title("VARIANT 2 Variance w/ Component-Wise Diffusion & Common Noise")
     variance_hist(ax4, var3_var_hist, len(var3_var_hist))
     ax4.set_title("VARIANT 3 Variance using Random Mini Batches")
-    variance_naive(ax5)
+    variance_hist(ax5, var13_var_hist, len(var13_var_hist))
+    ax5.set_title("VARIANT 1+3 Variance w/ Component-Wise Diffusion using Random Batching")
+
+    variance_naive(ax6)
 
     plt.tight_layout()
     plt.savefig("variance_plot.png", dpi=150)
