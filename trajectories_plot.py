@@ -6,6 +6,7 @@ from bc_algorithms import ackley, cbo, naive
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
+from variant_1and3 import comp_diff_random_batch
 
 
 def grid(res):
@@ -70,6 +71,7 @@ def main():
     ax3 = fig.add_subplot(3,2,3)
     ax4 = fig.add_subplot(3,2,4)
     ax5 = fig.add_subplot(3,2,5)
+    ax6 = fig.add_subplot(3,2,6)
 
     # plot graphs
 
@@ -77,17 +79,20 @@ def main():
     _, _, _, var1_part_hist, _, _, _ = component_wise_diff(ackley, d=2, seed=0)
     _, _, _, var2_part_hist, _, _, _ = common_noise(ackley, d=2, seed=0)
     _, _, _, var3_part_hist, _, _, _ = random_mini_batch(ackley, d=2, seed=0)
+    _, _, _, var13_part_hist, _, _, _ = comp_diff_random_batch(ackley, d=2, seed=0)
 
     particle_hist(ax1, cbo_part_hist)
     ax1.set_title("BC CBO Particle Trajectories")
     particle_hist(ax2, var1_part_hist)
-    ax2.set_title("VARIANT 1 Particle Trajectories w/ Component-Wise Diffusion")
+    ax2.set_title("VARIANT 1: Particle Trajectories w/ Component-Wise Diffusion")
     particle_hist(ax3, var2_part_hist)
-    ax3.set_title("VARIANT 2 Particle Trajectories w/ Component-Wise Diffusion & Common Noise")
+    ax3.set_title("VARIANT 2: Particle Trajectories w/ Component-Wise Diffusion & Common Noise")
     particle_hist(ax4, var3_part_hist)
-    ax4.set_title("VARIANT 3 Particle Trajectories using Random Mini Batches")
+    ax4.set_title("VARIANT 3: Particle Trajectories using Random Mini Batches")
+    particle_hist(ax5, var13_part_hist)
+    ax5.set_title("VARIANT 1+3: Particle Trajectories w/ Component-Wise Diffusion using Random Batching")
 
-    naive_part_plot(ax5)
+    naive_part_plot(ax6)
 
     plt.tight_layout()
     plt.savefig("trajectories_plot.png", dpi=150)
