@@ -127,7 +127,6 @@ if __name__ == "__main__": # runs when this is the main file of this execution
 
     print(f"Best x position found: {best_x_naive}")
     print(f"Best f(x): {best_val_naive:.6f}")
-    print(f"Iterations: 0")
+    print(f"num particles: {len(x_positions_naive)})")
     print(f"Variance: {variance}")
     print("True minimum: f(0,0) = 0")
-    print(f"num particles: {len(x_positions_naive)})")
