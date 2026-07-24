@@ -10,30 +10,36 @@ def ackley(x): # x = (x_1, x_2, ..., x_n)
     # constants
     a = 20; b = 0.2; c = 2*np.pi
     d = x.shape[1]
+    lib = torch if isinstance(x, torch.Tensor) else np # dispatch so autograd works when x is a tensor (see sgd)
 
     # results in one number for each particle
-    sum_sq = np.sum(x**2, axis=1) / d # term Σxᵢ²/n (sum across row)
-    sum_cos = np.sum(np.cos(c*x), axis = 1) / d # term Σcos(cxᵢ)/n
+    sum_sq = (x**2).sum(axis=1) / d # term Σxᵢ²/n (sum across row)
+    sum_cos = lib.cos(c*x).sum(axis=1) / d # term Σcos(cxᵢ)/n
 
-    # return result of Ackley function (np array of values)
-    return -a*np.exp(-b*np.sqrt(sum_sq)) - np.exp(sum_cos) + a + np.exp(1)
+    # return result of Ackley function (array of values)
+    return -a*lib.exp(-b*lib.sqrt(sum_sq)) - lib.exp(sum_cos) + a + np.exp(1)
 
 def rastrigin(x, B=0.0, C=0.0): # x = (x_1, x_2, ..., x_n)
     # B = argmin L(x); C = min L(x)
 
     shifted = x - B
     d = shifted.shape[-1] # d = dimension
-    terms = shifted**2 - 10*np.cos(2*np.pi*shifted) + 10
+    lib = torch if isinstance(x, torch.Tensor) else np # account for cbo (np) and sgd (torch)
+    terms = shifted**2 - 10*lib.cos(2*np.pi*shifted) + 10
 
-    # return result of Rastrigin function (np array of values)
+    # return result of Rastrigin function (array of values)
     return terms.sum(axis=-1) / d + C
 
-def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, seed=0):
-    """ γ = learning rate/step size """
-    rng = np.random.default_rng(seed) # draw random starting pts (1 per simulation)
+def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, seed=0,
+        n_data=None, batch_size=None):
+    """ γ = learning rate/step size
+        If n_data is given, f must accept (x, batch_idx) and return the mini-batch loss
+        estimate for gradient
+        If n_data is None, f(x) is called directly and the exact/full gradient is
+        used every step """
+    rng = np.random.default_rng(seed) # draw random starting pts (1 per simulation); also drives mini-batch draws
     lo, hi = domain
-    x = rng.uniform(lo, hi, size=(n_sims, d))
-    epochs = 1e-6
+    x = torch.tensor(rng.uniform(lo, hi, size=(n_sims, d)), requires_grad=True)
 
     # HISTORY PLOTS
     # store best f(x) value at each iteration
@@ -42,42 +48,51 @@ def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, 
     best_val_hist = []
     running_best = np.inf
 
-    """***"""
-    active = np.ones(n_sims, dtype=bool)
+    active = np.ones(n_sims, dtype=bool) # boolean array to track which sims haven't converged yet
 
     for _ in range(max_iters):
-        # compute gradient numerically
-        grad = np.zeros_like(x)
-        for i in range(d): # one dim at a time
-            x_plus = x.copy(); x_minus = x.copy()
-            x_plus[:, i] += epochs
-            x_minus[:, i] -= epochs
-            grad[:, i] = (f(x_plus) - f(x_minus)) / (2*epochs) # approximate ∂f/∂xi
+        # compute gradient via autograd; sims are independent so summing gives the correct per-row gradient
+        if n_data is not None:
+            batch_idx = rng.choice(n_data, size=batch_size, replace=False) # random mini-batch of data indices
+            f_vals = f(x, batch_idx) # mini-batch loss estimate L̂(x) -- SGD's noise
+        else:
+            f_vals = f(x)
+        f_vals.sum().backward() # compute gradients
+        grad = x.grad # ∂f_vals[i]/∂x[i] for each row i
 
-        step = lr*grad # scale gradient by learning rate
-        x_new = x.copy()
-        x_new[active] = x[active] - step[active]  # gradient descent step
+        with torch.no_grad(): # update active rows only
+            x_new = x.clone()
+            x_new[active] = x[active] - lr*grad[active] # gradient descent step
 
-        f_vals = f(x_new)
+        with torch.no_grad():
+            # re-use the same mini-batch so the logged loss reflects the step just taken
+            f_vals_new = (f(x_new, batch_idx) if n_data is not None else f(x_new)).detach().numpy()
 
         # Obj val history
-        obj_val_hist.append(f_vals.min())
+        obj_val_hist.append(f_vals_new.min())
 
         # Best obj val history
-        running_best = min(running_best, f_vals.min())
+        running_best = min(running_best, f_vals_new.min())
         best_val_hist.append(running_best)
 
         # Freeze trajectories once they stop moving
-        step_size = np.linalg.norm(x_new - x, axis=1)
+        with torch.no_grad():
+            step_size = torch.linalg.norm(x_new - x, dim=1).numpy()
         active = active & (step_size >= tol)
 
-        x = x_new # update
+        x = x_new.detach().requires_grad_(True) # fresh leaf tensor for next iteration's autograd
 
-        if not active.any():
+        if not active.any(): # if all sims have converged
             break
 
 
-    f_vals = f(x)
+    with torch.no_grad():
+        if n_data is not None:
+            batch_idx = rng.choice(n_data, size=batch_size, replace=False)
+            f_vals = f(x, batch_idx).detach().numpy()
+        else:
+            f_vals = f(x).detach().numpy()
+    x = x.detach().numpy()
     best_idx = np.argmin(f_vals)
 
     return (x[best_idx], best_val_hist[-1], np.array(x), np.array(f_vals), np.array(obj_val_hist), np.array(best_val_hist))
