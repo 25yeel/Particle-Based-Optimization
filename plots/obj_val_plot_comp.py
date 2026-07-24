@@ -87,7 +87,7 @@ def obj_val_naive(ax, f=naive_fixedNFE):
 def main():
     # create blank canvas
     fig = plt.figure(figsize=(15,15))
-    fig.suptitle("CBO on the 2D Ackley Function", fontsize=14, fontweight="bold")
+    fig.suptitle("CBO on the 2D Ackley Function: COMPARISON BY NFE=1000", fontsize=14, fontweight="bold")
 
     # 2x2 figure panels
     ax1 = fig.add_subplot(6,3,1)
