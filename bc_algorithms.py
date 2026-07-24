@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 # rng = np.random.default_rng(0) # set up seeded random num generator
 # lo, hi = -32, 32
@@ -100,23 +101,39 @@ def cbo(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, d
     lo, hi = domain
     x = rng.uniform(lo, hi, size=(n_particles, d))
 
+    f_vals = f(x)
 
     # HISTORY PLOTS
     # store all particle points at each iteration
-    particle_hist = [] # [[[x1,x2],[x1,x2], ...]
+    particle_hist = [x.copy()] # [[[x1,x2],[x1,x2], ...]
                        #  [[x1,x2],[x1,x2], ...]
                        # ] trajectory shape(iterations, num parts, dim)
     # store consensus point at each iteration
-    consensus_hist = [] # [[x1, x2], ...]
+    c = consensus_point(x, f_vals, alpha)
+    consensus_hist = [c.copy()] # [[x1, x2], ...]
     # store best f(x) value at each iteration
-    obj_val_hist = []
+    obj_val_hist = [f_vals.min()]
     # store RUNNING BEST f(x) value at each iteration
-    best_val_hist = []
+    best_val_hist = [f_vals.min()]
     running_best = np.inf
     # store variance/loss at each iteration
-    variance_hist = []
+    mean = x.mean(axis=0) # expectation: average all part points
+    v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
+    variance_hist = [v]
 
     for _ in range(max_iters):
+        # EULER-MARUYAMA POS UPDATE
+        diff = x - c # X̄ - consensus pt
+        dist = np.linalg.norm(diff, axis=1, keepdims=True) # Euclidean dist |x-c|
+        noise = rng.normal(size=(n_particles, d))
+        dW = np.sqrt(dt)*noise # Brownian motion/random noise term
+
+        # Pull each particle towards consensus
+        x = x - lam*diff*dt + sigma*dist*dW # current pos - drift + diffusion
+
+        # Particle history
+        particle_hist.append(x.copy())
+
         # Consensus history
         f_vals = f(x) # re-run ackley every iteration
         c = consensus_point(x, f_vals, alpha)
@@ -133,18 +150,6 @@ def cbo(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, d
         mean = x.mean(axis=0) # expectation: average all part points
         v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
         variance_hist.append(v)
-
-        # Particle history
-        # EULER-MARUYAMA POS UPDATE
-        diff = x - c # X̄ - consensus pt
-        dist = np.linalg.norm(diff, axis=1, keepdims=True) # Euclidean dist |x-c|
-        noise = rng.normal(size=(n_particles, d))
-        dW = np.sqrt(dt)*noise # Brownian motion/random noise term
-
-        # Pull each particle towards consensus
-        x = x - lam*diff*dt + sigma*dist*dW # current pos - drift + diffusion
-
-        particle_hist.append(x.copy())
 
         # Check how spread out the particles are (relative to consensus pt)
         if v < tol:
@@ -177,7 +182,7 @@ def naive(f, d, domain=(-32,32), n_particles=50):
 if __name__ == "__main__": # runs when this is the main file of this execution
     print("BASE CASE CBO")
 
-    best_x, running_best, consensus_hist, _, obj_val_hist, _, _ = cbo(ackley, d=2, seed=0)
+    best_x, running_best, consensus_hist, part_hist, obj_val_hist, best_val_hist, var_hist = cbo(ackley, d=2, seed=0)
 
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")

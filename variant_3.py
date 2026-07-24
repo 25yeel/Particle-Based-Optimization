@@ -12,32 +12,41 @@ def random_mini_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0,
     lo, hi = domain
     x = rng.uniform(lo, hi, size=(n_particles, d))
 
+    f_vals = f(x)
 
     # HISTORY PLOTS
     # store all particle points at each iteration
-    particle_hist = [] # [[[x1,x2],[x1,x2], ...]
+    particle_hist = [x.copy()] # [[[x1,x2],[x1,x2], ...]
                        #  [[x1,x2],[x1,x2], ...]
                        # ] trajectory shape(iterations, num parts, dim)
     # store consensus point at each iteration
-    consensus_hist = [] # [[x1, x2], ...]
+    batch_idx = rng.choice(n_particles, size=batch_size, replace=False)
+    x_batch = x[batch_idx] # batch of points
+    f_batch = f(x_batch) # obj values of batch
+    c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only
+    consensus_hist = [c.copy()] # [[x1, x2], ...]
     # store best f(x) value at each iteration
-    obj_val_hist = []
+    obj_val_hist = [f_vals.min()]
     # store RUNNING BEST f(x) value at each iteration
-    best_val_hist = []
+    best_val_hist = [f_vals.min()]
     running_best = np.inf
     # store variance/loss at each iteration
-    variance_hist = []
+    mean = x.mean(axis=0) # expectation: average all part points
+    v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
+    variance_hist = [v]
 
     for _ in range(max_iters):
-        # MINI-BATCH CONSENSUS POINT
-        # draw M random particle indices without replacement
-        batch_idx = rng.choice(n_particles, size=batch_size, replace=False)
-        x_batch = x[batch_idx] # batch of points
-        f_batch = f(x_batch) # obj values of batch
+        # Particle history
+        # EULER-MARUYAMA POS UPDATE
+        diff = x - c # X̄ - consensus pt
+        dist = np.linalg.norm(diff, axis=1, keepdims=True) # Euclidean dist |x-c|
+        noise = rng.normal(size=(n_particles, d))
+        dW = np.sqrt(dt)*noise # Brownian motion/random noise term
 
-        # Consensus history
-        c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only
-        consensus_hist.append(c.copy())
+        # Pull each particle towards consensus
+        x = x - lam*diff*dt + sigma*dist*dW # current pos - drift + diffusion
+
+        particle_hist.append(x.copy())
 
         f_vals = f(x) # re-run ackley every iteration
 
@@ -53,17 +62,15 @@ def random_mini_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0,
         v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
         variance_hist.append(v)
 
-        # Particle history
-        # EULER-MARUYAMA POS UPDATE
-        diff = x - c # X̄ - consensus pt
-        dist = np.linalg.norm(diff, axis=1, keepdims=True) # Euclidean dist |x-c|
-        noise = rng.normal(size=(n_particles, d))
-        dW = np.sqrt(dt)*noise # Brownian motion/random noise term
+        # MINI-BATCH CONSENSUS POINT
+        # draw M random particle indices without replacement
+        batch_idx = rng.choice(n_particles, size=batch_size, replace=False)
+        x_batch = x[batch_idx] # batch of points
+        f_batch = f(x_batch) # obj values of batch
 
-        # Pull each particle towards consensus
-        x = x - lam*diff*dt + sigma*dist*dW # current pos - drift + diffusion
-
-        particle_hist.append(x.copy())
+        # Consensus history
+        c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only
+        consensus_hist.append(c.copy())
 
         # Check how spread out the particles are (relative to consensus pt)
         if v < tol:
