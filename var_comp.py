@@ -3,7 +3,7 @@ from bc_algorithms import ackley, consensus_point
 
 NFE_comp_benchmark = 1000
 
-def naive(f, d, domain=(-32,32), seed=0):
+def naive_fixedNFE(f, d, domain=(-32,32), seed=0):
     rng = np.random.default_rng(seed) # set up seeded random num generator
     lo, hi = domain
     x = rng.uniform(lo, hi, size=(NFE_comp_benchmark, d)) # x = (x_1, x_2, ..., x_n)
@@ -28,7 +28,7 @@ def naive(f, d, domain=(-32,32), seed=0):
 
     return (best_x, best_obj_val, x_positions, f_vals, n_particles, v)
 
-def naive_uniform(f, d, domain=(-32,32)):
+def naive_uniform_fixedNFE(f, d, domain=(-32,32)):
     # generate uniform grid of points
     lo, hi = domain
     pts_per_dim = round(NFE_comp_benchmark ** (1/d)) # same num of pts on each axis
@@ -516,8 +516,8 @@ def comp_diff_random_batch_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1
     return (best_x, running_best, consensus_hist, particle_hist, obj_val_hist, best_val_hist, var_hist)
 
 if __name__ == "__main__": # runs when this is the main file of this execution
-    naive(ackley, d=2)
-    naive_uniform(ackley, d=2)
+    naive_fixedNFE(ackley, d=2)
+    naive_uniform_fixedNFE(ackley, d=2)
     cbo_fixedNFE(ackley, d=2)
     component_wise_diff_fixedNFE(ackley, d=2)
     common_noise_fixedNFE(ackley, d=2)
