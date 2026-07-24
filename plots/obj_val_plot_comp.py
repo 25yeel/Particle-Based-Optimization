@@ -1,13 +1,14 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
-from bc_algorithms import ackley, cbo, naive, naive_uniform
-from variant_1 import component_wise_diff
-from variant_2 import common_noise
-from variant_3 import random_mini_batch
-from variant_1and3 import comp_diff_random_batch
+from bc_algorithms import ackley, naive, naive_uniform
+from var_comp import cbo_fixedNFE, component_wise_diff_fixedNFE, common_noise_fixedNFE, random_mini_batch_fixedNFE, comp_diff_random_batch_fixedNFE
 
 
 # best f(x) found SO FAR over iterations
@@ -108,11 +109,11 @@ def main():
     ax17 = fig.add_subplot(6,3,17)
 
 
-    _, cbo_best_val, cbo_consensus_hist, _, cbo_obj_val_hist, cbo_best_val_hist, _ = cbo(ackley, d=2, seed=0)
-    _, var1_best_val, var1_consensus_hist, _, var1_obj_val_hist, var1_best_val_hist, _ = component_wise_diff(ackley, d=2, seed=0)
-    _, var2_best_val, var2_consensus_hist, _, var2_obj_val_hist, var2_best_val_hist, _ = common_noise(ackley, d=2, seed=0)
-    _, var3_best_val, var3_consensus_hist, _, var3_obj_val_hist, var3_best_val_hist, _ = random_mini_batch(ackley, d=2, seed=0)
-    _, var13_best_val, var13_consensus_hist, _, var13_obj_val_hist, var13_best_val_hist, _ = comp_diff_random_batch(ackley, d=2, seed=0)
+    _, cbo_best_val, cbo_consensus_hist, _, cbo_obj_val_hist, cbo_best_val_hist, _ = cbo_fixedNFE(ackley, d=2, seed=0)
+    _, var1_best_val, var1_consensus_hist, _, var1_obj_val_hist, var1_best_val_hist, _ = component_wise_diff_fixedNFE(ackley, d=2, seed=0)
+    _, var2_best_val, var2_consensus_hist, _, var2_obj_val_hist, var2_best_val_hist, _ = common_noise_fixedNFE(ackley, d=2, seed=0)
+    _, var3_best_val, var3_consensus_hist, _, var3_obj_val_hist, var3_best_val_hist, _ = random_mini_batch_fixedNFE(ackley, d=2, seed=0)
+    _, var13_best_val, var13_consensus_hist, _, var13_obj_val_hist, var13_best_val_hist, _ = comp_diff_random_batch_fixedNFE(ackley, d=2, seed=0)
 
     # plot graphs
     # running best obj val history
@@ -157,7 +158,7 @@ def main():
 
 
     plt.tight_layout()
-    plt.savefig("obj_val_plot.png", dpi=150)
+    plt.savefig("obj_val_plot_comp.png", dpi=150)
 
 if __name__ == "__main__":
     main()
