@@ -3,6 +3,58 @@ from bc_algorithms import ackley, consensus_point
 
 NFE_comp_benchmark = 1000
 
+def naive(f, d, domain=(-32,32), seed=0):
+    rng = np.random.default_rng(seed) # set up seeded random num generator
+    lo, hi = domain
+    x = rng.uniform(lo, hi, size=(NFE_comp_benchmark, d)) # x = (x_1, x_2, ..., x_n)
+
+    f_vals = f(x)
+    best_idx = np.argmin(f_vals) # index of lowest f val
+
+    # Variance history
+    mean = x.mean(axis=0) # expectation: average all part points
+    v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
+
+    best_x = x[best_idx]; best_obj_val = f_vals[best_idx]; x_positions = np.array(x); f_vals = np.array(f_vals); n_particles = len(f_vals)
+
+    print("---------------------------------------")
+    print("NAIVE ALGORITHM RESULTS")
+    print(f"Best x position found: {best_x}")
+    print(f"Best f(x): {best_obj_val:.6f}")
+    print(f"num particles: {n_particles}")
+    print(f"Variance: {v}")
+    print(f"NFE: {NFE_comp_benchmark}")
+
+
+    return (best_x, best_obj_val, x_positions, f_vals, n_particles, v)
+
+def naive_uniform(f, d, domain=(-32,32)):
+    # generate uniform grid of points
+    lo, hi = domain
+    pts_per_dim = round(NFE_comp_benchmark ** (1/d)) # same num of pts on each axis
+    lin = np.linspace(lo, hi, pts_per_dim)
+    mesh = np.meshgrid(*([lin] * d))
+    x = np.stack([m.ravel() for m in mesh], axis=1) # shape: (pts_per_dim**d, d)
+
+    f_vals = f(x)
+    best_idx = np.argmin(f_vals) # index of lowest f val
+
+    # Variance history
+    mean = x.mean(axis=0) # expectation: average all part points
+    v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
+
+    best_x = x[best_idx]; best_obj_val = f_vals[best_idx]; x_positions = np.array(x); f_vals = np.array(f_vals); n_particles = len(f_vals)
+
+    print("---------------------------------------")
+    print("NAIVE ALGORITHM (UNIFORM GRID DISTR) RESULTS")
+    print(f"Best x position found: {best_x}")
+    print(f"Best f(x): {best_obj_val:.6f}")
+    print(f"num particles: {n_particles}")
+    print(f"Variance: {v}")
+    print(f"NFE: {len(f_vals)}")
+
+    return (best_x, best_obj_val, x_positions, f_vals, n_particles, v)
+
 def cbo_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, dt=0.05, max_iters=500, tol=1e-5, seed=0):
     """ lambda = drift const; sigma = diffusion const; alpha = consensus sharpness
         dt = discretization step size for Euler-Maruyama
@@ -79,6 +131,7 @@ def cbo_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alph
 
     best_x = x[best_idx]; running_best = best_val_hist[-1]; consensus_hist = np.array(consensus_hist); particle_hist = np.array(particle_hist); obj_val_hist = np.array(obj_val_hist); best_val_hist = np.array(best_val_hist); var_hist = np.array(variance_hist)
 
+    print("---------------------------------------")
     print("CBO")
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
@@ -166,6 +219,7 @@ def component_wise_diff_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1.0,
 
     best_x = x[best_idx]; running_best = best_val_hist[-1]; consensus_hist = np.array(consensus_hist); particle_hist = np.array(particle_hist); obj_val_hist = np.array(obj_val_hist); best_val_hist = np.array(best_val_hist); var_hist = np.array(variance_hist)
 
+    print("---------------------------------------")
     print("CBO VARIANT 1")
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
@@ -257,6 +311,7 @@ def common_noise_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=
 
     best_x = x[best_idx]; running_best = best_val_hist[-1]; consensus_hist = np.array(consensus_hist); particle_hist = np.array(particle_hist); obj_val_hist = np.array(obj_val_hist); best_val_hist = np.array(best_val_hist); var_hist = np.array(variance_hist)
 
+    print("---------------------------------------")
     print("CBO VARIANT 2")
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
@@ -351,6 +406,7 @@ def random_mini_batch_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1.0, s
 
     best_x = x[best_idx]; running_best = best_val_hist[-1]; consensus_hist = np.array(consensus_hist); particle_hist = np.array(particle_hist); obj_val_hist = np.array(obj_val_hist); best_val_hist = np.array(best_val_hist); var_hist = np.array(variance_hist)
 
+    print("---------------------------------------")
     print("CBO VARIANT 3")
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
@@ -449,6 +505,7 @@ def comp_diff_random_batch_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1
 
     best_x = x[best_idx]; running_best = best_val_hist[-1]; consensus_hist = np.array(consensus_hist); particle_hist = np.array(particle_hist); obj_val_hist = np.array(obj_val_hist); best_val_hist = np.array(best_val_hist); var_hist = np.array(variance_hist)
 
+    print("---------------------------------------")
     print("CBO VARIANT 1&3")
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
@@ -459,6 +516,8 @@ def comp_diff_random_batch_fixedNFE(f, d, domain=(-32,32), n_particles=50, lam=1
     return (best_x, running_best, consensus_hist, particle_hist, obj_val_hist, best_val_hist, var_hist)
 
 if __name__ == "__main__": # runs when this is the main file of this execution
+    naive(ackley, d=2)
+    naive_uniform(ackley, d=2)
     cbo_fixedNFE(ackley, d=2)
     component_wise_diff_fixedNFE(ackley, d=2)
     common_noise_fixedNFE(ackley, d=2)
