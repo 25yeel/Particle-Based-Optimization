@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
-from bc_algorithms import ackley, cbo, naive
+from bc_algorithms import ackley, cbo, naive, naive_uniform
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
@@ -67,8 +67,8 @@ def consensus_hist(ax, consensus_hist, n_particles=50, m_size=50):
     info3 = mpatches.Patch(color='none', label=f'M: {m_size}')
     ax.legend(handles=handles + [info1, info2, info3], fontsize=8)
 
-def obj_val_naive(ax):
-    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley, d=2)
+def obj_val_naive(ax, f=naive):
+    best_x, best_val, x_positions, f_vals, n_particles, variance = f(ackley, d=2)
     # draw horizontal line to compare best_val to other graphs
     ax.axhline(y=best_val, color="#1D9E75", linestyle="-", linewidth=1.4, label=(f"Best f val: {best_val:.4f}"))
     ax.set_title("NAIVE ALGORITHM Best f(x)")
@@ -105,6 +105,7 @@ def main():
     ax14 = fig.add_subplot(6,3,14)
     ax15 = fig.add_subplot(6,3,15)
     ax16 = fig.add_subplot(6,3,16)
+    ax17 = fig.add_subplot(6,3,17)
 
 
     _, cbo_best_val, cbo_consensus_hist, _, cbo_obj_val_hist, cbo_best_val_hist, _ = cbo(ackley, d=2, seed=0)
@@ -126,6 +127,9 @@ def main():
     best_obj_val_hist(ax13, var13_best_val_hist, var13_best_val, m_size=10)
     ax13.set_title("VARIANT 1+3 Running Best f(x) over iterations")
     obj_val_naive(ax16)
+    obj_val_naive(ax17, f=naive_uniform)
+    ax17.set_title("NAIVE ALGORITHM (UNIFORM GRID DISTR) Best f(x)")
+
 
     # obj value history
     obj_val_hist(ax2, cbo_obj_val_hist)

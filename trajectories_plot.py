@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
-from bc_algorithms import ackley, cbo, naive
+from bc_algorithms import ackley, cbo, naive, naive_uniform
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
@@ -53,12 +53,12 @@ def particle_hist(ax, particle_hist, m_size=50):
     ax.legend(handles=handles + [info1, info2], fontsize=8, loc="upper right")
 
 # NAIVE POINT PLOT
-def naive_part_plot(ax):
+def naive_part_plot(ax, f=naive):
     _, _, Z = grid(res=300)
     # draw 2d array heatmap
     ax.imshow(Z, extent=[-32, 32, -32, 32], origin="lower", cmap="Blues", aspect="equal", norm=mcolors.PowerNorm(gamma=0.4,vmin=0,vmax=22))
 
-    best_x, best_val, x_positions, f_vals, n_particles, variance = naive(ackley, d=2)
+    best_x, best_val, x_positions, f_vals, n_particles, variance = f(ackley, d=2)
     ax.scatter(x_positions[:,0], x_positions[:,1], color="orange", s=0.5) # plot individual points
     ax.scatter(best_x[0], best_x[1], color="red", s=12, label="min f(x)")
 
@@ -74,16 +74,17 @@ def naive_part_plot(ax):
 
 def main():
     # create blank canvas
-    fig = plt.figure(figsize=(13,10))
+    fig = plt.figure(figsize=(15,15))
     fig.suptitle("CBO on the 2D Ackley Function", fontsize=14, fontweight="bold")
 
     # 2x2 figure panels
-    ax1 = fig.add_subplot(3,2,1)
-    ax2 = fig.add_subplot(3,2,2)
-    ax3 = fig.add_subplot(3,2,3)
-    ax4 = fig.add_subplot(3,2,4)
-    ax5 = fig.add_subplot(3,2,5)
-    ax6 = fig.add_subplot(3,2,6)
+    ax1 = fig.add_subplot(4,2,1)
+    ax2 = fig.add_subplot(4,2,2)
+    ax3 = fig.add_subplot(4,2,3)
+    ax4 = fig.add_subplot(4,2,4)
+    ax5 = fig.add_subplot(4,2,5)
+    ax6 = fig.add_subplot(4,2,6)
+    ax7 = fig.add_subplot(4,2,7)
 
     # plot graphs
 
@@ -105,6 +106,8 @@ def main():
     ax5.set_title("VARIANT 1+3: Particle Trajectories w/ Component-Wise Diffusion using Random Batching")
 
     naive_part_plot(ax6)
+    naive_part_plot(ax7, f=naive_uniform)
+    ax7.set_title("NAIVE ALGORITHM (UNIFORM GRID DISTR) Particle Positions")
 
     plt.tight_layout()
     plt.savefig("trajectories_plot.png", dpi=150)

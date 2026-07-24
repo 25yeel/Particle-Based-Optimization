@@ -160,14 +160,36 @@ def cbo(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, d
 
     return (x[best_idx], best_val_hist[-1], np.array(consensus_hist), np.array(particle_hist), np.array(obj_val_hist), np.array(best_val_hist), np.array(variance_hist))
 
-def naive(f, d, domain=(-32,32), n_particles=50):
+def naive(f, d, domain=(-32,32), n_particles=50, seed=0):
     _, _, consensus_hist, _, _, _, _ = cbo(f, d)
     n_iters = len(consensus_hist)
     NFE_comp_cost = n_particles * n_iters
 
-    rng = np.random.default_rng(0) # set up seeded random num generator
+    rng = np.random.default_rng(seed) # set up seeded random num generator
     lo, hi = domain
     x = rng.uniform(lo, hi, size=(NFE_comp_cost, d)) # x = (x_1, x_2, ..., x_n)
+
+    f_vals = f(x)
+    best_idx = np.argmin(f_vals) # index of lowest f val
+
+    # Variance history
+    mean = x.mean(axis=0) # expectation: average all part points
+    v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
+
+    # return best part pos, best obj val, num of iterations
+    return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals), v)
+
+def naive_uniform(f, d, domain=(-32,32), n_particles=50):
+    _, _, consensus_hist, _, _, _, _ = cbo(f, d)
+    n_iters = len(consensus_hist)
+    NFE_comp_cost = n_particles * n_iters
+
+    # generate uniform grid of points
+    lo, hi = domain
+    pts_per_dim = round(NFE_comp_cost ** (1/d)) # same num of pts on each axis
+    lin = np.linspace(lo, hi, pts_per_dim)
+    mesh = np.meshgrid(*([lin] * d))
+    x = np.stack([m.ravel() for m in mesh], axis=1) # shape: (pts_per_dim**d, d)
 
     f_vals = f(x)
     best_idx = np.argmin(f_vals) # index of lowest f val
@@ -194,6 +216,17 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print("NAIVE ALGORITHM RESULTS")
 
     best_x_naive, best_val_naive, x_positions_naive, f_vals_naive, n_part_naive, variance = naive(ackley, d=2)
+
+    print(f"Best x position found: {best_x_naive}")
+    print(f"Best f(x): {best_val_naive:.6f}")
+    print(f"num particles: {len(x_positions_naive)})")
+    print(f"Variance: {variance}")
+    print("True minimum: f(0,0) = 0")
+
+    print("---------------------------------------")
+    print("NAIVE ALGORITHM (UNIFORM DISTR) RESULTS")
+
+    best_x_naive, best_val_naive, x_positions_naive, f_vals_naive, n_part_naive, variance = naive_uniform(ackley, d=2)
 
     print(f"Best x position found: {best_x_naive}")
     print(f"Best f(x): {best_val_naive:.6f}")
