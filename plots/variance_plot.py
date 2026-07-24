@@ -67,7 +67,6 @@ def main():
     _, _, _, _, _, _, var2_var_hist = common_noise(ackley, d=2, seed=0)
     _, _, _, _, _, _, var3_var_hist = random_mini_batch(ackley, d=2, seed=0)
     _, _, _, _, _, _, var13_var_hist = comp_diff_random_batch(ackley, d=2, seed=0)
-    _, _, _, _, _, naive_var = naive(ackley, d=2)
 
     variance_hist(ax1, cbo_var_hist, len(cbo_var_hist))
     ax1.set_title("BC CBO Variance")
