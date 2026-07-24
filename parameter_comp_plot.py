@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
-from bc_algorithms import ackley, rastrigin, sgd, cbo, naive
+from bc_algorithms import ackley, rastrigin, sgd, cbo, naive, naive_uniform
 from variant_1 import component_wise_diff
 from variant_2 import common_noise
 from variant_3 import random_mini_batch
