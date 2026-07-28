@@ -44,7 +44,7 @@ def main():
         ax.plot(epochs, acc_hist, label=label)
 
     ax.set_xlabel("Epoch"); ax.set_ylabel("Test accuracy")
-    ax.set_xlim(0, 100); ax.set_ylim(0, 1)
+    # ax.set_xlim(0, 100); ax.set_ylim(0, 1)
     ax.set_title("Figure 6: CBO variants on MNIST")
 
     ax.legend()

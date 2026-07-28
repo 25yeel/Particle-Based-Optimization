@@ -99,7 +99,7 @@ def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, 
 
 
 def consensus_point(x, f_vals, alpha):
-    weights = np.exp(-alpha*f_vals) # weight function
+    weights = np.exp(-alpha*(f_vals - f_vals.min())) # weight function
     weights = weights / weights.sum() # weigh each particle accordingly
     weighted_mean = np.sum(x*weights[:, None], axis=0) # sum down cols
 

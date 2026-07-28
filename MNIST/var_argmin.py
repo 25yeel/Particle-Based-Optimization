@@ -29,7 +29,7 @@ def comp_diff_random_batch_argmin(f, d, domain=(-32,32), n_particles=100, lam=1.
     batch_idx = rng.choice(n_particles, size=M, replace=False)
     x_batch = x[batch_idx] # batch of points
     f_batch = f(x_batch) # obj values of batch
-    # CHANGE IN CALCULATION OF CONSENSUS POINTS -> ALPHA IS DROPPED
+    """CHANGE IN CALCULATION OF CONSENSUS POINTS -> ALPHA IS DROPPED"""
     # c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only
     c = x_batch[np.argmin(f_batch)]
     consensus_hist = [c.copy()] # [[x1, x2], ...]
@@ -92,8 +92,9 @@ def comp_diff_random_batch_argmin(f, d, domain=(-32,32), n_particles=100, lam=1.
         f_batch = f(x_batch) # obj values of batch
 
         # Consensus history
-        # CHANGE IN CALCULATION OF CONSENSUS POINTS
-        c = x_batch[np.argmin(f_batch)] # consensus point evaluated from mini batch only
+        """CHANGE IN CALCULATION OF CONSENSUS POINTS (DROPPED ALPHA)"""
+        # c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only
+        c = x_batch[np.argmin(f_batch)]
         consensus_hist.append(c.copy())
 
         if (i+1) % epoch_step_size == 0:

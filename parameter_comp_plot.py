@@ -13,5 +13,4 @@ def accuracy():
     pass
 
 def tradeoff(ax, f, N=100, M=10, n=10000, m=50, lr=0.1, sigma=np.sqrt(0.1), lam=1):
-
-# i'm confused on how we can directly compare the algorithms
+    pass

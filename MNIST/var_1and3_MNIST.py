@@ -17,9 +17,9 @@ def comp_diff_random_batch(f, d, domain=(-32,32), n_particles=100, lam=1.0, sigm
         BUT the consensus point is computed from random mini-batch of M particles
         rather than all N particles each iteration """
 
-    # set up uniform distribution
     rng = np.random.default_rng(seed) # set up seeded random num generator
     # lo, hi = domain
+    # set up uniform distribution
     # x = rng.uniform(lo, hi, size=(n_particles, d))
     # Standard normal distribution, described in section 4.3
     x = rng.normal(loc=0.0, scale=1.0, size=(n_particles, d))  # each particle ~ N(0, I_d)
