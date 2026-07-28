@@ -19,6 +19,7 @@ def ackley_1d(ax, res=1000, domain=(-32, 32)):
 
     ax.plot(lin, y, color="#1D9E75", linewidth=1.8)
     ax.scatter(0, ackley(np.array([[0.0]]))[0], color="red", s=40, zorder=3, label="True min (0, 0)") # mark true min
+    # local minima of ackley clearly separate from global min
 
     ax.set_title("Ackley Function in 1D")
     ax.set_xlabel("x")
@@ -36,6 +37,7 @@ def rastrigin_1d(ax, res=1000, domain=(-5.12, 5.12)):
 
     ax.plot(lin, y, color="#5A6DD8", linewidth=1.8)
     ax.scatter(0, rastrigin(np.array([[0.0]]))[0], color="red", s=40, zorder=3, label="True min (0, 0)") # mark true min
+    # local minima of rastrigin are very close to the global min
 
     ax.set_title("Rastrigin Function in 1D")
     ax.set_xlabel("x")
