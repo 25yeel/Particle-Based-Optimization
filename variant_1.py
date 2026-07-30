@@ -37,7 +37,7 @@ def component_wise_diff(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.
         diff = x - c # X̄ - consensus pt
         """ WE NO LONGER NEED TO COMPUTE EUCLIDEAN DIST
             with dist we mult every dW by the same scalar (all d directions scaled identically)
-            BUT NOW each col k col k of hte update is diff[:,k] * dW[:,k]
+            BUT NOW each col k col k of the update is diff[:,k] * dW[:,k]
             scaled by that dim's own dist to consensus """
         # dist = np.linalg.norm(diff, axis=1, keepdims=True) # Euclidean dist |x-c|
         noise = rng.normal(size=(n_particles, d))
