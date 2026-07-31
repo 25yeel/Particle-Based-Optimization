@@ -2,7 +2,7 @@ import torch
 from mnist_data import load_mnist
 
 # constants
-D_IMG = 784 # flattened 28x28 pixel input dimension
+D_IMG = 728 # flattened 26x28 pixel input dimension (top/bottom row cropped, matching paper section 4.3)
 N_CLASSES = 10 # digits 0-9
 D_PARAMS = N_CLASSES * D_IMG + N_CLASSES # size of one particle's flattened (theta, B): 7850
 M_BATCH = 50 # m in (4.6): training data mini batch size
@@ -14,11 +14,11 @@ def unflatten_params(x):
     theta = x[:, :N_CLASSES * D_IMG].reshape(n_particles, N_CLASSES, D_IMG)
     b = x[:, N_CLASSES * D_IMG:] # remaining 10 entries of 7850
 
-    # returns theta: (N, 10, 784) = (particles, classes, pixels), b: (N, 10) = (particles, classes)
+    # returns theta: (N, 10, 728) = (particles, classes, pixels), b: (N, 10) = (particles, classes)
     return theta, b
 
 # run neural network
-def mnist_forward(x, X_batch): # x: (N, D_PARAMS) particle params; X_batch: (m, 784) flattened images
+def mnist_forward(x, X_batch): # x: (N, D_PARAMS) particle params; X_batch: (m, 728) flattened images
     theta, b = unflatten_params(x)
 
     # f(x,x̂) in 4.3 --> but batched over particles and images simultaneously
@@ -31,7 +31,7 @@ def mnist_forward(x, X_batch): # x: (N, D_PARAMS) particle params; X_batch: (m, 
 
 # score how wrong each particle's network is
 def mnist_loss(x, X_batch, y_batch): # 4.4: L(x), ℓ(f,y)
-    # x: (N, D_PARAMS); X_batch: (m, 784); y_batch: (m, 10)
+    # x: (N, D_PARAMS); X_batch: (m, 728); y_batch: (m, 10)
 
     probs = mnist_forward(x, X_batch) # (N, m, 10)
     probs = probs.clamp(min=1e-12) # avoid log(0)
@@ -57,7 +57,7 @@ def make_mnist_objective(X_train, y_train, m, seed=0):
             losses = train_loss_fn(x_t, batch_idx)
         return losses.numpy()
 
-    return f # returne explicit data batch instead of torch
+    return f # return explicit data batch instead of torch
 
 if __name__ == "__main__":
 

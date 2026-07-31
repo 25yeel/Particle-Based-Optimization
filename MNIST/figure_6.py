@@ -28,9 +28,9 @@ def main():
     f_ref = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
     *_, ref_acc_hist = comp_diff_random_batch(f_ref, d=D_PARAMS, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
 
-    # no noise variant: samge model but with sigma=0
-    f_nonoise = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
-    *_, nonoise_acc_hist = comp_diff_random_batch(f_nonoise, d=D_PARAMS, sigma=0.0, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
+    # # no noise variant: samge model but with sigma=0
+    # f_nonoise = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
+    # *_, nonoise_acc_hist = comp_diff_random_batch(f_nonoise, d=D_PARAMS, sigma=0.0, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
 
     # argmin variant: x̄* = argmin over the particle batch, instead of softmax average
     f_argmin = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
@@ -38,14 +38,14 @@ def main():
 
     fig, ax = plt.subplots(figsize=(8,6))
     for label, acc_hist in [("Reference (4.6)", ref_acc_hist),
-                            ("No noise", nonoise_acc_hist),
+                            # ("No noise", nonoise_acc_hist),
                             ("Argmin consensus", argmin_acc_hist)]:
         epochs = np.arange(1, len(acc_hist) + 1)
         ax.plot(epochs, acc_hist, label=label)
 
     ax.set_xlabel("Epoch"); ax.set_ylabel("Test accuracy")
     # ax.set_xlim(0, 100); ax.set_ylim(0, 1)
-    ax.set_title("Figure 6: CBO variants on MNIST")
+    ax.set_title("Figure 6: CBO Variants on MNIST")
 
     ax.legend()
     ax.grid(alpha=0.3)

@@ -4,13 +4,14 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import numpy as np
 import torch
+from tqdm import tqdm
 
 from bc_algorithms import ackley, consensus_point, cbo
 from mnist_data import N_TRAIN, load_mnist
 from mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
 
 
-def comp_diff_random_batch_argmin(f, d, domain=(-32,32), n_particles=100, lam=1.0, sigma=np.sqrt(0.1), dt=0.1, max_iters=500, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0):
+def comp_diff_random_batch_argmin(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), dt=0.1, max_iters=500, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0):
     """ Same as comp_diff_random_batch, but x̄* is the argmin of the batch (2.5)
         instead of the softmax-weighted average (2.3) -> no 'alpha' needed here """
 
@@ -54,13 +55,19 @@ def comp_diff_random_batch_argmin(f, d, domain=(-32,32), n_particles=100, lam=1.
         # indicator function
         return (preds == true_labels).float().mean().item() # (4.5): test accuracy function
 
-    for i in range(max_iters):
+    stale_count = 0
+    patience = epoch_step_size
+    # for i in range(max_iters):
+    # i=0
+    # with tqdm() as pbar:
+        # while v>=tol:
+    for i in tqdm(range(10*epoch_step_size)):
         # Particle history
         # EULER-MARUYAMA POS UPDATE
         diff = x - c # X̄ - consensus pt
         """ WE NO LONGER NEED TO COMPUTE EUCLIDEAN DIST
             with dist we mult every dW by the same scalar (all d directions scaled identically)
-            BUT NOW each col k col k of hte update is diff[:,k] * dW[:,k]
+            BUT NOW each col k col k of the update is diff[:,k] * dW[:,k]
             scaled by that dim's own dist to consensus """
         # dist = np.linalg.norm(diff, axis=1, keepdims=True) # Euclidean dist |x-c|
         noise = rng.normal(size=(n_particles, d))
@@ -77,13 +84,24 @@ def comp_diff_random_batch_argmin(f, d, domain=(-32,32), n_particles=100, lam=1.
         obj_val_hist.append(f_vals.min())
 
         # Best obj val history
-        running_best = min(running_best, f_vals.min())
+        # running_best = min(running_best, f_vals.min())
+        if f_vals.min() < running_best:
+            running_best = f_vals.min()
+            stale_count = 0
+        else:
+            stale_count +=1
         best_val_hist.append(running_best)
 
         # Variance history
         mean = x.mean(axis=0) # expectation: average all part points
         v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
         variance_hist.append(v)
+
+        # RESTART: independent Brownian kick when x̄* stalls (paper Remark 2.3 / Alg 2.1 step 4)
+        # NOT scaled by diff -- this is what can revive a collapsed swarm
+        if stale_count >= patience:
+            x = x + sigma*np.sqrt(dt)*rng.normal(size=(n_particles, d))
+            stale_count = 0
 
         # MINI-BATCH CONSENSUS POINT
         # draw M random particle indices without replacement
@@ -102,7 +120,9 @@ def comp_diff_random_batch_argmin(f, d, domain=(-32,32), n_particles=100, lam=1.
             x_star = torch.from_numpy(c).float()
             acc = test_accuracy(x_star, X_test, y_test)
             test_accuracy_hist.append(acc)
-
+        # i+=1
+        # pbar.set_postfix(v=v)
+        # pbar.update(1)
         # Check how spread out the particles are (relative to consensus pt)
         if v < tol:
             break

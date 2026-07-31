@@ -7,7 +7,7 @@ from torchvision import datasets
 N_TRAIN = 10_000
 
 def load_mnist(n_train=N_TRAIN, seed=0, root="./mnist_data"):
-    """ X_* : (n, 784) float tensor, pixel values scaled to [0,1]
+    """ X_* : (n, 728) float tensor, pixel values scaled to [0,1]
         y_* : (n, 10) one-hot float tensor
         Downloads MNIST via torchvision on first call (cached under `root` after that). """
     train_raw = datasets.MNIST(root=root, train=True, download=True)
@@ -17,7 +17,8 @@ def load_mnist(n_train=N_TRAIN, seed=0, root="./mnist_data"):
         rng = torch.Generator().manual_seed(seed)
         idx = torch.randperm(len(raw), generator=rng)[:n] # random subset of size n of all indices (paper subsamples n=10^4 out of 60k train images)
 
-        X = raw.data[idx].float().reshape(len(idx), -1) / 255.0 # (n, 28*28) scaled to [0,1]
+        imgs = raw.data[idx, 1:-1, :].float() / 255.0 # drop first/last pixel row: 28x28 -> 26x28, matching the paper's 728-dim input (section 4.3)
+        X = imgs.reshape(len(idx), -1) # (n, 26*28=728)
         y = torch.nn.functional.one_hot(raw.targets[idx], num_classes=10).float() # (n, 10)
         # return flattened images and one-hot labels
         return X, y
@@ -30,7 +31,7 @@ def load_mnist(n_train=N_TRAIN, seed=0, root="./mnist_data"):
 
 if __name__ == "__main__":
     X_train, y_train, X_test, y_test = load_mnist()
-    # confirm: X --> ([10000, 784]) Y --> ([10000, 10])
+    # confirm: X --> ([10000, 728]) Y --> ([10000, 10])
     # pixel value in [0,1]
     # digit distribution is balanced (can see it's generally 900-1200 per class)
     print(f"X_train: {X_train.shape}, y_train: {y_train.shape}")
