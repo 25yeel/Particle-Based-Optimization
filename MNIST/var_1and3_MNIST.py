@@ -13,15 +13,13 @@ from mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
 # constants in 4.6 for reference: N=100, M=10, n=10^4, m=50, lr=0.1, sigma=sqrt(0.1), lambda=1
 
 # Variant 1 in Totzeck CBO: Component-wise diffusion + Random mini batches
-def comp_diff_random_batch(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), alpha=30.0, dt=0.1, num_epochs=15, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0): # adjust  max_iters based on how quickly accuracy plateaus
+def comp_diff_random_batch(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), alpha=30.0, dt=0.1, num_epochs=15, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0, kick_sigma=None): # adjust  max_iters based on how quickly accuracy plateaus
     """ Same drift and diffusion as the base CBO scheme,
         BUT the consensus point is computed from random mini-batch of M particles
         rather than all N particles each iteration """
 
     rng = np.random.default_rng(seed) # set up seeded random num generator
-    # lo, hi = domain
-    # set up uniform distribution
-    # x = rng.uniform(lo, hi, size=(n_particles, d))
+    kick_sigma = sigma if kick_sigma is None else kick_sigma
     # Standard normal distribution, described in section 4.3
     x = rng.normal(loc=0.0, scale=1.0, size=(n_particles, d))  # each particle ~ N(0, I_d)
 
@@ -105,7 +103,7 @@ def comp_diff_random_batch(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), a
         # RESTART: independent Brownian kick when x̄* stalls (paper Remark 2.3 / Alg 2.1 step 4)
         # NOT scaled by diff -- this is what can revive a collapsed swarm
         if stale_count >= patience:
-            x = x + sigma*np.sqrt(dt)*rng.normal(size=(n_particles, d))
+            x = x + kick_sigma*np.sqrt(dt)*rng.normal(size=(n_particles, d))
             stale_count = 0
 
         # MINI-BATCH CONSENSUS POINT
