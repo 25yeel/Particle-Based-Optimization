@@ -11,7 +11,7 @@ from mnist_data import N_TRAIN, load_mnist
 from mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
 
 
-def comp_diff_random_batch_argmin(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), dt=0.1, max_iters=500, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0):
+def comp_diff_random_batch_argmin(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), dt=0.1, num_epochs=15, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0):
     """ Same as comp_diff_random_batch, but x̄* is the argmin of the batch (2.5)
         instead of the softmax-weighted average (2.3) -> no 'alpha' needed here """
 
@@ -61,7 +61,7 @@ def comp_diff_random_batch_argmin(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(
     # i=0
     # with tqdm() as pbar:
         # while v>=tol:
-    for i in tqdm(range(10*epoch_step_size)):
+    for i in tqdm(range(num_epochs*epoch_step_size)):
         # Particle history
         # EULER-MARUYAMA POS UPDATE
         diff = x - c # X̄ - consensus pt
@@ -76,7 +76,7 @@ def comp_diff_random_batch_argmin(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(
         # Pull each particle towards consensus
         x = x - lam*diff*dt + sigma*diff*dW # current pos - drift + diffusion
 
-        particle_hist.append(x.copy())
+        # particle_hist.append(x.copy())
 
         f_vals = f(x) # re-run ackley every iteration
 

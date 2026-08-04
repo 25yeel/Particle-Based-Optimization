@@ -11,6 +11,9 @@ import matplotlib.patches as mpatches
 from bc_algorithms import ackley, rastrigin
 from var_1and3_MNIST import comp_diff_random_batch # variant 2.1 with parameters 4.6
 from var_argmin import comp_diff_random_batch_argmin # argmin variant 2.5
+
+from var_1and3_simplified import comp_diff_random_batch_simp
+from var_argmin_simplified import comp_diff_random_batch_argmin_simp
 # variant without the last term in 2.5 -> set sigma=0
 
 from mnist_data import load_mnist
@@ -26,7 +29,7 @@ def main():
 
     # reference case (2.1, 4.6): full model, with noise, weighted avg consensus
     f_ref = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
-    *_, ref_acc_hist = comp_diff_random_batch(f_ref, d=D_PARAMS, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
+    *_, ref_acc_hist = comp_diff_random_batch_simp(f_ref, d=D_PARAMS, num_epochs=100, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
 
     # # no noise variant: samge model but with sigma=0
     # f_nonoise = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
@@ -34,7 +37,7 @@ def main():
 
     # argmin variant: x̄* = argmin over the particle batch, instead of softmax average
     f_argmin = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
-    *_, argmin_acc_hist = comp_diff_random_batch_argmin(f_argmin, d=D_PARAMS, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
+    *_, argmin_acc_hist = comp_diff_random_batch_argmin_simp(f_argmin, d=D_PARAMS, num_epochs=100, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
 
     fig, ax = plt.subplots(figsize=(8,6))
     for label, acc_hist in [("Reference (4.6)", ref_acc_hist),
