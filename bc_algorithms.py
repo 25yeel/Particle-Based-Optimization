@@ -30,8 +30,7 @@ def rastrigin(x, B=0.0, C=0.0): # x = (x_1, x_2, ..., x_n)
     # return result of Rastrigin function (array of values)
     return terms.sum(axis=-1) / d + C
 
-def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, seed=0,
-        n_data=None, batch_size=None):
+def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, seed=0, n_data=None, batch_size=None):
     """ γ = learning rate/step size
         If n_data is given, f must accept (x, batch_idx) and return the mini-batch loss
         estimate for gradient
@@ -42,6 +41,8 @@ def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, 
     x = torch.tensor(rng.uniform(lo, hi, size=(n_sims, d)), requires_grad=True)
 
     # HISTORY PLOTS
+    # store all sim positions at each iteration (mirrors cbo's particle_hist)
+    particle_hist = [x.detach().numpy().copy()]
     # store best f(x) value at each iteration
     obj_val_hist = []
     # store RUNNING BEST f(x) value at each iteration
@@ -63,6 +64,9 @@ def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, 
         with torch.no_grad(): # update active rows only
             x_new = x.clone()
             x_new[active] = x[active] - lr*grad[active] # gradient descent step
+
+        # Position history
+        particle_hist.append(x_new.detach().numpy().copy())
 
         with torch.no_grad():
             # re-use the same mini-batch so the logged loss reflects the step just taken
@@ -92,10 +96,10 @@ def sgd(f, d, domain=(-32,32), n_sims=100, lr=0.01, max_iters=10_000, tol=1e-5, 
             f_vals = f(x, batch_idx).detach().numpy()
         else:
             f_vals = f(x).detach().numpy()
-    x = x.detach().numpy()
     best_idx = np.argmin(f_vals)
 
-    return (x[best_idx], best_val_hist[-1], np.array(x), np.array(f_vals), np.array(obj_val_hist), np.array(best_val_hist))
+    # best x pos, running best obj val, particle hist, ending f vals, obj val hist, running best hist
+    return (particle_hist[-1][best_idx], best_val_hist[-1], np.array(particle_hist), np.array(f_vals), np.array(obj_val_hist), np.array(best_val_hist))
 
 
 def consensus_point(x, f_vals, alpha):
@@ -219,7 +223,7 @@ def naive_uniform(f, d, domain=(-32,32)):
     return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals), v)
 
 if __name__ == "__main__": # runs when this is the main file of this execution
-    print("BASE CASE CBO")
+    print("BASE CASE CBO ON ACKLEY")
 
     best_x, running_best, consensus_hist, part_hist, obj_val_hist, best_val_hist, var_hist = cbo(ackley, d=2, seed=0)
 
@@ -227,6 +231,40 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print(f"Running Best f(x): {running_best:.6f}")
     print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
     print(f"Iterations: {len(consensus_hist)}")
+    print("True minimum: f(0,0) = 0")
+
+    print("---------------------------------------")
+
+    print("BASE CASE CBO ON RASTRIGIN")
+
+    best_x, running_best, consensus_hist, part_hist, obj_val_hist, best_val_hist, var_hist = cbo(rastrigin, d=2, seed=0)
+
+    print(f"Best x position found: {best_x}")
+    print(f"Running Best f(x): {running_best:.6f}")
+    print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
+    print(f"Iterations: {len(consensus_hist)}")
+    print("True minimum: f(0,0) = 0")
+
+    print("---------------------------------------")
+    print("SGD on ACKLEY")
+
+    best_x, running_best, part_hist, f_vals, obj_val_hist, best_val_hist = sgd(ackley, d=2, seed=0)
+
+    print(f"Best x position found: {best_x}")
+    print(f"Running Best f(x): {running_best:.6f}")
+    print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
+    print(f"Iterations: {len(obj_val_hist)}")
+    print("True minimum: f(0,0) = 0")
+
+    print("---------------------------------------")
+    print("SGD on RASTRIGIN")
+
+    best_x, running_best, part_hist, f_vals, obj_val_hist, best_val_hist = sgd(rastrigin, d=2, domain=(-5.12, 5.12), seed=0)
+
+    print(f"Best x position found: {best_x}")
+    print(f"Running Best f(x): {running_best:.6f}")
+    print(f"Ending/Best f(x): {obj_val_hist[-1]:.6f}")
+    print(f"Iterations: {len(obj_val_hist)}")
     print("True minimum: f(0,0) = 0")
 
     print("---------------------------------------")
