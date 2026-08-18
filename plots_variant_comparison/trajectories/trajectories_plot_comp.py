@@ -8,7 +8,7 @@ import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
 from bc_algorithms import ackley
-from var_comp import naive_fixedNFE, naive_uniform_fixedNFE, cbo_fixedNFE, component_wise_diff_fixedNFE, common_noise_fixedNFE, random_mini_batch_fixedNFE, comp_diff_random_batch_fixedNFE
+from plots_variant_comparison.var_NFEcomp import naive_fixedNFE, naive_uniform_fixedNFE, cbo_fixedNFE, component_wise_diff_fixedNFE, common_noise_fixedNFE, random_mini_batch_fixedNFE, comp_diff_random_batch_fixedNFE
 
 
 def grid(res):

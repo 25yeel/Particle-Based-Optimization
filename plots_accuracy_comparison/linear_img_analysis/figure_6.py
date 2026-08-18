@@ -9,15 +9,15 @@ import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
 from bc_algorithms import ackley, rastrigin
-from var_1and3_MNIST import comp_diff_random_batch # variant 2.1 with parameters 4.6
-from var_argmin import comp_diff_random_batch_argmin # argmin variant 2.5
+from var_1and3_MNISTuse import comp_diff_random_batch # variant 2.1 with parameters 4.6
+from var_argmin_MNISTuse import comp_diff_random_batch_argmin # argmin variant 2.5
 
-from var_1and3_simplified import comp_diff_random_batch_simp
-from var_argmin_simplified import comp_diff_random_batch_argmin_simp
+from plots_accuracy_comparison.var_1and3_MNISTuse import comp_diff_random_batch_simp
+from plots_accuracy_comparison.var_argmin_MNISTuse import comp_diff_random_batch_argmin_simp
 # variant without the last term in 2.5 -> set sigma=0
 
-from mnist_data import load_mnist
-from mnist_model import D_PARAMS, M_BATCH, make_mnist_objective
+from MNIST.mnist_data import load_mnist
+from MNIST.mnist_model import D_PARAMS, M_BATCH, make_mnist_objective
 
 def main():
     # fig = plt.figure(figsize=(15,15))

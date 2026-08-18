@@ -7,8 +7,8 @@ import torch
 from tqdm import tqdm
 
 from bc_algorithms import ackley, consensus_point, cbo
-from mnist_data import N_TRAIN, load_mnist
-from mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
+from MNIST.mnist_data import N_TRAIN, load_mnist
+from MNIST.mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
 
 
 def comp_diff_random_batch_argmin(f, d, n_particles=100, lam=1.0, sigma=np.sqrt(0.1), dt=0.1, num_epochs=15, tol=0.0, M=10, m=50, X_test=None, y_test=None, seed=0):
