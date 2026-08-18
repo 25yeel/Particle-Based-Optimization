@@ -7,8 +7,8 @@ import torch
 from tqdm import tqdm
 
 from bc_algorithms import ackley, consensus_point, cbo
-from mnist_data import N_TRAIN, load_mnist
-from mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
+from MNIST.mnist_data import N_TRAIN, load_mnist
+from MNIST.mnist_model import mnist_forward, D_PARAMS, M_BATCH, make_mnist_objective
 
 # constants in 4.6 for reference: N=100, M=10, n=10^4, m=50, lr=0.1, sigma=sqrt(0.1), lambda=1
 
