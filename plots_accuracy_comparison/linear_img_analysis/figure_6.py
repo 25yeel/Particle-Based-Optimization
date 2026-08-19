@@ -24,7 +24,7 @@ def main():
     f_ref = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
     *_, ref_acc_hist = comp_diff_random_batch_simp(f_ref, d=D_PARAMS, num_epochs=200, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0)
 
-    # # no noise variant: samge model but with sigma=0
+    # # no noise variant: same model but with sigma=0
     f_nonoise = make_mnist_objective(X_train, y_train, m=M_BATCH, seed=0)
     *_, nonoise_acc_hist = comp_diff_random_batch_simp(f_nonoise, d=D_PARAMS, num_epochs=200, sigma=0.0, tol=0.0, m=M_BATCH, X_test=X_test, y_test=y_test, seed=0, kick_sigma=np.sqrt(0.1))
 

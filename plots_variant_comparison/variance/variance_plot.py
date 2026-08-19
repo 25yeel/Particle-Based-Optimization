@@ -8,10 +8,10 @@ import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
 from bc_algorithms import ackley, cbo, naive, naive_uniform
-from variant_1 import component_wise_diff
-from variant_2 import common_noise
-from variant_3 import random_mini_batch
-from variant_1and3 import comp_diff_random_batch
+from variants_cbo.variant_1 import component_wise_diff
+from variants_cbo.variant_2 import common_noise
+from variants_cbo.variant_3 import random_mini_batch
+from variants_cbo.variant_1and3 import comp_diff_random_batch
 
 
 # VARIANCE PLOT
