@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
-from sgd import sgd_simp
+from plots_accuracy_comparison.sgd import sgd_simp
 
 from LeNet.lenet_data import load_lenet_mnist
 from LeNet.lenet_model import D_PARAMS, M_BATCH, make_batch_loss, lenet_forward

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 
-from sgd import sgd_simp
+from plots_accuracy_comparison.sgd import sgd_simp
 
 from MNIST.mnist_data import load_mnist
 from MNIST.mnist_model import D_PARAMS, M_BATCH, make_batch_loss
