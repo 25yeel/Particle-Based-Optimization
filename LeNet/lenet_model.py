@@ -1,6 +1,10 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import torch
 import torch.nn.functional as F
-from lenet_data import load_lenet_mnist
+from LeNet.lenet_data import load_lenet_mnist
 
 # constants: LeNet-5 layer shapes
 N_CLASSES = 10 # digits 0-9

@@ -1,15 +1,15 @@
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from var_1and3_simplified import comp_diff_random_batch_simp
-from var_argmin_simplified import comp_diff_random_batch_argmin_simp
+from plots_accuracy_comparison.var_1and3_MNISTuse import comp_diff_random_batch_simp
+from plots_accuracy_comparison.var_argmin_MNISTuse import comp_diff_random_batch_argmin_simp
 
-from lenet_data import load_lenet_mnist
-from lenet_model import D_PARAMS, M_BATCH, make_lenet_objective, lenet_forward
+from LeNet.lenet_data import load_lenet_mnist
+from LeNet.lenet_model import D_PARAMS, M_BATCH, make_lenet_objective, lenet_forward
 
 # SAME AS figure_6.py, EXCEPT forward_fn=lenet_forward instead of mnist_forward
 def main():
@@ -17,15 +17,15 @@ def main():
 
     # reference case (2.1, 4.6): full model, with noise, weighted avg consensus
     f_ref = make_lenet_objective(X_train, y_train, m=M_BATCH, seed=0)
-    *_, ref_acc_hist = comp_diff_random_batch_simp(f_ref, d=D_PARAMS, lam=1.0, sigma=np.sqrt(10), num_epochs=10, tol=0.0, dt=1, m=100, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
+    *_, ref_acc_hist = comp_diff_random_batch_simp(f_ref, d=D_PARAMS, num_epochs=100, tol=0.0, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
 
     # no noise variant: same model but with sigma=0
     f_nonoise = make_lenet_objective(X_train, y_train, m=M_BATCH, seed=0)
-    *_, nonoise_acc_hist = comp_diff_random_batch_simp(f_nonoise, d=D_PARAMS, lam=1.0, num_epochs=10, sigma=0.0, tol=0.0, dt=1, m=100, X_test=X_test, y_test=y_test, seed=0, kick_sigma=np.sqrt(0.1), forward_fn=lenet_forward)
+    *_, nonoise_acc_hist = comp_diff_random_batch_simp(f_nonoise, d=D_PARAMS, num_epochs=100, sigma=0.0, tol=0.0, X_test=X_test, y_test=y_test, seed=0, kick_sigma=np.sqrt(0.1), forward_fn=lenet_forward)
 
     # argmin variant: x̄* = argmin over the particle batch, instead of softmax average
     f_argmin = make_lenet_objective(X_train, y_train, m=M_BATCH, seed=0)
-    *_, argmin_acc_hist = comp_diff_random_batch_argmin_simp(f_argmin, d=D_PARAMS, lam=1.0, sigma=np.sqrt(1), num_epochs=10, tol=0.0, dt=1, m=100, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
+    *_, argmin_acc_hist = comp_diff_random_batch_argmin_simp(f_argmin, d=D_PARAMS, num_epochs=100, tol=0.0, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
 
     fig, ax = plt.subplots(figsize=(8, 6))
     for label, acc_hist in [("Reference (4.6)", ref_acc_hist),

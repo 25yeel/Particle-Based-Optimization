@@ -1,5 +1,9 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import torch
-from mnist_data import load_mnist
+from MNIST.mnist_data import load_mnist
 
 # constants
 D_IMG = 728 # flattened 26x28 pixel input dimension (top/bottom row cropped, matching paper section 4.3)
