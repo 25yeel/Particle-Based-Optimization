@@ -197,10 +197,10 @@ def naive(f, d, domain=(-32,32), seed=0):
     mean = x.mean(axis=0) # expectation: average all part points
     v = 0.5*np.mean(np.sum((x-mean)**2, axis=1)) # variance
 
-    # return best part pos, best obj val, num of iterations
+    # return best part pos, best obj val, x positions, obj vals, num of iterations, variance
     return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals), v)
 
-def naive_uniform(f, d, domain=(-32,32)):
+def naive_uniform(f, d, domain=(-32,32), seed=0):
     _, _, consensus_hist, part_hist, _, _, _ = cbo(f, d)
     n_iters = len(consensus_hist)
     n_particles = part_hist.shape[1]

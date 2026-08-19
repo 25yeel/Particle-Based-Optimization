@@ -1,0 +1,3 @@
+Algorithm,Best Obj. Value,Total NFE,Final Variance,Iterations/Samples
+CBO,0.000144,14550,0.000006,291
+Naive,1.133082,14550,338.805311,14550
