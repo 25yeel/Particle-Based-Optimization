@@ -74,7 +74,7 @@ def plot(f, d=2, seed=0):
 
     fig.suptitle("CBO vs. Naive Search", fontsize=14, fontweight="bold")
     plt.tight_layout()
-    plt.savefig("cbo_vs_naive.png", dpi=150)
+    plt.savefig("cbo_vs_naive_rastrigin.png", dpi=150)
 
 def main():
     plot(ackley)
