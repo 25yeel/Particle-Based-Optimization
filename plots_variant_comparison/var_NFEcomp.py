@@ -1,3 +1,4 @@
+# LAST UPDATED 8/19/2026
 import numpy as np
 from bc_algorithms import ackley, consensus_point
 

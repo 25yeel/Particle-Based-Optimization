@@ -1,3 +1,4 @@
+# LAST UPDATED 8/19/2026
 import torch
 import torch.nn.functional as F
 from LeNet.lenet_data import load_lenet_mnist
