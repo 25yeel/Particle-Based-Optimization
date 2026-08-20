@@ -1,7 +1,7 @@
 # LAST UPDATED 8/19/2026
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -143,9 +143,9 @@ def main():
     ax5.set_title("VARIANT 1 Best f(x) over iterations")
     obj_val_hist(ax8, var2_obj_val_hist)
     ax8.set_title("VARIANT 2 Best f(x) over iterations")
-    obj_val_hist(ax11, var3_obj_val_hist, m_size=10)
+    obj_val_hist(ax11, var3_obj_val_hist) # obj_val_hist stays full-swarm-sourced (n_particles cost), unlike best_val_hist
     ax11.set_title("VARIANT 3 Best f(x) over iterations")
-    obj_val_hist(ax14, var13_obj_val_hist, m_size=10)
+    obj_val_hist(ax14, var13_obj_val_hist) # same: full-swarm-sourced, not mini-batch
     ax14.set_title("VARIANT 1+3 Best f(x) over iterations")
 
     # consensus point history

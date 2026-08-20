@@ -1,7 +1,7 @@
 # LAST UPDATED 8/19/2026
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
 
 import csv
 import numpy as np
@@ -16,6 +16,7 @@ from variants_cbo.variant_1and3 import comp_diff_random_batch
 
 def plot(f, d=2, seed=0):
 
+    """HYPERPARAMS ARE THE SAME AS IN bc_algorithms.py"""
     # BC CBO
     best_x, running_best, consensus_hist, part_hist, obj_val_hist, best_val_hist, var_hist = cbo(f, d=d, seed=seed)
     n_particles = part_hist.shape[1]
@@ -35,16 +36,19 @@ def plot(f, d=2, seed=0):
     NFE_var2 = np.arange(1, n_iters_var2+1) * n_particles_var2
 
     # variant 3
-    *_, var3_part_hist, _, var3_best_val_hist, var3_var_hist = random_mini_batch(f, d=d, seed=seed)
-    n_particles_var3 = part_hist.shape[1]
+    # batch_size must match random_mini_batch's batch_size param (default 10) --
+    # best_val_hist is sourced from the mini-batch, so NFE = batch_size*n_iters, not n_particles*n_iters
+    batch_size_var3 = 10
+    *_, var3_part_hist, _, var3_best_val_hist, var3_var_hist = random_mini_batch(f, d=d, seed=seed, batch_size=batch_size_var3)
     n_iters_var3 = len(var3_best_val_hist)
-    NFE_var3 = np.arange(1, n_iters_var3+1) * n_particles_var3
+    NFE_var3 = np.arange(1, n_iters_var3+1) * batch_size_var3
 
     # variant 1&3
-    *_, var1and3_part_hist, _, var1and3_best_val_hist, var1and3_var_hist = random_mini_batch(f, d=d, seed=seed)
-    n_particles_var1and3 = part_hist.shape[1]
+    # same mini-batch NFE accounting as variant 3, per comp_diff_random_batch's batch_size param
+    batch_size_var1and3 = 10
+    *_, var1and3_part_hist, _, var1and3_best_val_hist, var1and3_var_hist = comp_diff_random_batch(f, d=d, seed=seed, batch_size=batch_size_var1and3)
     n_iters_var1and3 = len(var1and3_best_val_hist)
-    NFE_var1and3 = np.arange(1, n_iters_var1and3+1) * n_particles_var1and3
+    NFE_var1and3 = np.arange(1, n_iters_var1and3+1) * batch_size_var1and3
 
     """best_x_naive, best_val_naive, x_positions_naive, f_vals_naive, n_evals_naive, var_naive = naive(f, d=d, seed=seed)"""
     # naive has no iterations (draws and evaluates one big independent and identically distributed batch at once)
@@ -70,7 +74,7 @@ def plot(f, d=2, seed=0):
         ["Var 1",   f"{var1_best_val_hist[-1]:.6f}", f"{NFE_var1[-1]}",   f"{var1_var_hist[-1]:.6f}", f"{n_iters_var1}"],
         ["Var 2",   f"{var2_best_val_hist[-1]:.6f}", f"{NFE_var2[-1]}",   f"{var2_var_hist[-1]:.6f}", f"{n_iters_var2}"],
         ["Var 3",   f"{var3_best_val_hist[-1]:.6f}", f"{NFE_var3[-1]}",   f"{var3_var_hist[-1]:.6f}", f"{n_iters_var3}"],
-        ["Var 1&3",   f"{var1and3_best_val_hist[-1]:.6f}", f"{NFE_var1and3[-1]}",   f"{var1and3_var_hist[-1]:.6f}", f"{n_iters_var1and3}"],
+        ["Var 1 and 3",   f"{var1and3_best_val_hist[-1]:.6f}", f"{NFE_var1and3[-1]}",   f"{var1and3_var_hist[-1]:.6f}", f"{n_iters_var1and3}"],
     ]
     col_widths = [max(len(h), *(len(r[i]) for r in rows)) for i, h in enumerate(headers)]
 
@@ -82,7 +86,7 @@ def plot(f, d=2, seed=0):
     for r in rows:
         print(fmt_row(r))
 
-    with open("cbo_vs_variants_summary.csv", "w", newline="") as fh:
+    with open("cbo_vs_variants.csv", "w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(headers)
         writer.writerows(rows)

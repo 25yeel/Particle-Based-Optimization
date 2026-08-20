@@ -1,4 +1,8 @@
 # LAST UPDATED 8/19/2026
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import numpy as np
 from bc_algorithms import ackley, consensus_point, cbo
 
@@ -29,7 +33,9 @@ def comp_diff_random_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma
     # store best f(x) value at each iteration
     obj_val_hist = [f_vals.min()]
     # store RUNNING BEST f(x) value at each iteration
-    best_val_hist = [f_vals.min()]
+    # sourced from the mini-batch (not the full swarm) so its NFE cost genuinely
+    # matches batch_size*n_iters -- honest accounting for what's actually plotted
+    best_val_hist = [f_batch.min()]
     running_best = np.inf
     # store variance/loss at each iteration
     mean = x.mean(axis=0) # expectation: average all part points
@@ -53,14 +59,10 @@ def comp_diff_random_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma
 
         particle_hist.append(x.copy())
 
-        f_vals = f(x) # re-run ackley every iteration
+        f_vals = f(x) # re-run ackley every iteration (full swarm -- diagnostic only, costs n_particles)
 
         # Obj val history
         obj_val_hist.append(f_vals.min())
-
-        # Best obj val history
-        running_best = min(running_best, f_vals.min())
-        best_val_hist.append(running_best)
 
         # Variance history
         mean = x.mean(axis=0) # expectation: average all part points
@@ -71,7 +73,12 @@ def comp_diff_random_batch(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma
         # draw M random particle indices without replacement
         batch_idx = rng.choice(n_particles, size=batch_size, replace=False)
         x_batch = x[batch_idx] # batch of points
-        f_batch = f(x_batch) # obj values of batch
+        f_batch = f(x_batch) # obj values of batch -- costs batch_size
+
+        # Best obj val history -- sourced from the mini-batch (same evaluations used
+        # for the consensus point below), so its NFE cost is honestly batch_size*n_iters
+        running_best = min(running_best, f_batch.min())
+        best_val_hist.append(running_best)
 
         # Consensus history
         c = consensus_point(x_batch, f_batch, alpha) # consensus point evaluated from mini batch only

@@ -1,7 +1,7 @@
 # LAST UPDATED 8/19/2026
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
 
 import csv
 import numpy as np
@@ -11,6 +11,7 @@ from bc_algorithms import ackley, rastrigin, cbo, naive, naive_uniform
 
 def plot(f, d=2, seed=0):
 
+    """HYPERPARAMS ARE THE SAME AS IN bc_algorithms.py"""
     best_x, running_best, consensus_hist, part_hist, obj_val_hist, best_val_hist, var_hist = cbo(f, d=d, seed=seed)
     n_particles = part_hist.shape[1]
     n_iters = len(best_val_hist)
@@ -48,7 +49,7 @@ def plot(f, d=2, seed=0):
     for r in rows:
         print(fmt_row(r))
 
-    with open("cbo_vs_naive_summary.csv", "w", newline="") as fh:
+    with open("cbo_vs_naive.csv", "w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(headers)
         writer.writerows(rows)
@@ -74,7 +75,7 @@ def plot(f, d=2, seed=0):
 
     fig.suptitle("CBO vs. Naive Search", fontsize=14, fontweight="bold")
     plt.tight_layout()
-    plt.savefig("cbo_vs_naive_rastrigin.png", dpi=150)
+    plt.savefig("cbo_vs_naive.png", dpi=150)
 
 def main():
     plot(ackley)
