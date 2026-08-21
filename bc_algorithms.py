@@ -180,8 +180,8 @@ def cbo(f, d, domain=(-32,32), n_particles=50, lam=1.0, sigma=1.0, alpha=30.0, d
 
     return (x[best_idx], best_val_hist[-1], np.array(consensus_hist), np.array(particle_hist), np.array(obj_val_hist), np.array(best_val_hist), np.array(variance_hist))
 
-def naive(f, d, domain=(-32,32), seed=0):
-    _, _, consensus_hist, part_hist, _, _, _ = cbo(f, d)
+def naive(f, d, domain=(-32,32), alg=cbo, seed=0):
+    _, _, consensus_hist, part_hist, _, _, _ = alg(f, d)
     n_iters = len(consensus_hist)
     n_particles = part_hist.shape[1]
     NFE_comp_cost = n_particles * n_iters
