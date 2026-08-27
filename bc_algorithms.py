@@ -200,8 +200,8 @@ def naive(f, d, domain=(-32,32), alg=cbo, seed=0):
     # return best part pos, best obj val, x positions, obj vals, num of iterations, variance
     return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals), v)
 
-def naive_uniform(f, d, domain=(-32,32), seed=0):
-    _, _, consensus_hist, part_hist, _, _, _ = cbo(f, d)
+def naive_uniform(f, d, domain=(-32,32), alg=cbo, seed=0):
+    _, _, consensus_hist, part_hist, _, _, _ = alg(f, d)
     n_iters = len(consensus_hist)
     n_particles = part_hist.shape[1]
     NFE_comp_cost = n_particles * n_iters

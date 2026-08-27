@@ -34,7 +34,7 @@ def main():
     ax.grid(alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("figure_sgd_lenet.png", dpi=150)
+    plt.savefig("figure_sgd_lenet_full_2.png", dpi=150)
 
 
 if __name__ == "__main__":

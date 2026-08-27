@@ -19,7 +19,7 @@ def plot(f, d=2, seed=0):
     n_iters = len(best_val_hist)
     NFE_cbo = np.arange(1, n_iters+1) * n_particles # each iter costs n_particles evaluations
 
-    best_x_naive, best_val_naive, x_positions_naive, f_vals_naive, n_evals_naive, var_naive = naive(f, d=d, alg=component_wise_diff, seed=seed)
+    best_x_naive, best_val_naive, x_positions_naive, f_vals_naive, n_evals_naive, var_naive = naive_uniform(f, d=d, alg=component_wise_diff, seed=seed)
     # naive has no iterations (draws and evaluates one big independent and identically distributed batch at once)
     # only output of naive is (NFE_total, best_val) point
     # so plot at every possible NFE
@@ -75,12 +75,12 @@ def plot(f, d=2, seed=0):
     ax2.legend()
     ax2.grid(alpha=0.3)
 
-    fig.suptitle("CBO vs. Naive Search", fontsize=14, fontweight="bold")
+    # fig.suptitle("CBO vs. Naive Search", fontsize=14, fontweight="bold")
     plt.tight_layout()
     plt.savefig("cbo_vs_naive.png", dpi=150)
 
 def main():
-    plot(ackley, d=10)
+    plot(ackley, d=5)
 
 if __name__ == "__main__":
     main()
