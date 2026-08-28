@@ -20,7 +20,7 @@ def main():
 
     # using make_batch_loss, instead of make_mnist_objective since is for grad-free cbo
     f_sgd = make_batch_loss(X_train, y_train)
-    sgd_best_x, sgd_acc_hist = sgd_simp(f_sgd, d=D_PARAMS, num_epochs=100, tol=0.0, X_test=X_test, y_test=y_test, seed=0, n_data=len(X_train), m=M_BATCH, forward_fn=lenet_forward)
+    sgd_best_x, sgd_acc_hist = sgd_simp(f_sgd, d=D_PARAMS, num_epochs=200, tol=0.0, X_test=X_test, y_test=y_test, seed=0, n_data=len(X_train), m=M_BATCH, forward_fn=lenet_forward)
 
     fig, ax = plt.subplots(figsize=(8,6))
     for label, acc_hist in [("SGD", sgd_acc_hist)]:
@@ -34,7 +34,7 @@ def main():
     ax.grid(alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("figure_sgd_lenet_full_2.png", dpi=150)
+    plt.savefig("figure_sgd_lenet_200.png", dpi=150)
 
 
 if __name__ == "__main__":
