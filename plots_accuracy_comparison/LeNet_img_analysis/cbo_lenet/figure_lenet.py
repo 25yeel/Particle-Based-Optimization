@@ -17,8 +17,8 @@ def main():
     X_train, y_train, X_test, y_test = load_lenet_mnist()
 
     # reference case (2.1, 4.6): full model, with noise, weighted avg consensus
-    f_ref = make_lenet_objective(X_train, y_train, m=60, seed=0)
-    *_, ref_acc_hist = comp_diff_random_batch_simp(f_ref, d=D_PARAMS, lam=0.8, sigma=0.2, alpha=30.0, num_epochs=200, tol=0.0, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
+    f_ref = make_lenet_objective(X_train, y_train, m=50, seed=0)
+    *_, ref_acc_hist = comp_diff_random_batch_simp(f_ref, d=D_PARAMS, lam=0.8, sigma=0.2, alpha=30.0, num_epochs=500, tol=0.0, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
 
     # no noise variant: same model but with sigma=0
     # f_nonoise = make_lenet_objective(X_train, y_train, m=M_BATCH, seed=0)
@@ -42,7 +42,7 @@ def main():
     ax.grid(alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("figure_lenet_sig02_lam08_m60_200.png", dpi=150)
+    plt.savefig("figure_lenet_sig02_lam08_500.png", dpi=150)
 
 
 if __name__ == "__main__":
