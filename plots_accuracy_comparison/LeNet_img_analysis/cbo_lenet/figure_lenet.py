@@ -29,9 +29,9 @@ def main():
     *_, argmin_acc_hist = comp_diff_random_batch_argmin_simp(f_argmin, d=D_PARAMS, lam=0.8, sigma=0.2, num_epochs=20, tol=0.0, X_test=X_test, y_test=y_test, seed=0, forward_fn=lenet_forward)
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    for label, acc_hist in [("Reference (4.6)", ref_acc_hist)]:
-                            # ("No noise", nonoise_acc_hist),
-                            # ("Argmin consensus", argmin_acc_hist)]:
+    for label, acc_hist in [("Reference (4.6)", ref_acc_hist),
+                            ("No noise", nonoise_acc_hist),
+                            ("Argmin consensus", argmin_acc_hist)]:
         epochs = np.arange(1, len(acc_hist) + 1)
         ax.plot(epochs, acc_hist, label=label)
 
