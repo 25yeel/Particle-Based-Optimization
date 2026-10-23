@@ -1,4 +1,4 @@
-# LAST UPDATED 8/19/2026
+# LAST UPDATED 10/22/2026
 import numpy as np
 import torch
 
@@ -223,6 +223,50 @@ def naive_uniform(f, d, domain=(-32,32), alg=cbo, seed=0):
     # return best part pos, best obj val, num of iterations
     return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals), v)
 
+# Algorithm 1: ZO-AdaMM (Section 3 Chen paper)
+def adamm(grad_fn, x0, T=1000, alpha=0.01, beta1=0.9, beta2=0.999, v0=1e-5, lo=None, hi=None, return_hist=False):
+    x = x0.copy() # optimize on parameter vector x
+    m = np.zeros_like(x) # momentum
+    v = np.zeros_like(x) # avg of squared grads
+    vhat = np.full_like(x, v0) # Chen paper initializes v0 = vhat0 = 1e-5
+
+    x_hist = [x.copy()]
+
+    # directly from section 3 of Chen paper Algorithm 1
+    for t in range(1, T + 1):
+        g = grad_fn(x) # FO gradient, or ZO estimate (below)
+        m = beta1 * m + (1 - beta1) * g
+        v = beta2 * v + (1 - beta2) * g**2
+        vhat = np.maximum(vhat, v) # (the AMSGrad fix: vhat never decreases)
+
+        # update step
+            # coords w historically large grads get smaller steps, and vice versa
+            # decaying learning rate
+        step = (alpha / np.sqrt(t)) * m / np.sqrt(vhat) # alpha_t = alpha/sqrt(t)
+        x = x - step
+
+        if lo is not None: # box constraint
+            x = np.clip(x, lo, hi)
+
+        x_hist.append(x.copy())
+
+    # optimized point, point history
+    return (x, np.array(x_hist)) if return_hist else x
+
+# gradient estimation for zeroth order AdaMM: noisy grad est build on fn vals
+def zo_grad_est(f, x, mu=None, q=10, rng=np.random.default_rng()):
+    d = x.size
+    mu = mu if mu is not None else 1.0 / np.sqrt(d) # paper's mu ~ 1/sqrt(T d)
+    fx = f(x)
+    g = np.zeros_like(x)
+    for _ in range(q): # over q random directions
+        u = rng.standard_normal(d)
+        u /= np.linalg.norm(u) # draw rand direction uniform on the unit sphere
+        # equation 1 from the paper
+        g += (d / mu) * (f(x + mu * u) - fx) * u
+    return g / q # return single avg grad over q random directions
+
+
 if __name__ == "__main__": # runs when this is the main file of this execution
     print("BASE CASE CBO ON ACKLEY")
 
@@ -288,4 +332,36 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print(f"Best f(x): {best_val_naive:.6f}")
     print(f"num particles: {len(x_positions_naive)})")
     print(f"Variance: {variance}")
+    print("True minimum: f(0,0) = 0")
+
+    print("---------------------------------------")
+    print("ADAMM ON ACKLEY")
+
+    def single(f):
+        return lambda x: float(f(x[None, :])[0])
+
+    # calculation of exact gradient
+    def fo_grad(f):
+        def g(x):
+            xt = torch.tensor(x[None, :], dtype=torch.float64, requires_grad=True)
+            f(xt).sum().backward()
+            return xt.grad.numpy()[0]
+        return g
+
+    f1 = single(ackley)
+    x0 = np.array([20.0, 25.0]) # starting point
+    T = 1000
+    q = 10
+    zo_rng = np.random.default_rng(1) # seed
+
+    # first-order AdaMM --> exact gradient of ackley
+    x_fo, hist_fo = adamm(fo_grad(ackley), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.999, lo=-32, hi=32, return_hist=True)
+
+    # zeroth-order AdaMM
+    x_zo, hist_zo = adamm(lambda x: zo_grad_est(f1, x, mu=1e-3, q=10, rng=zo_rng), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.3, lo=-32, hi=32, return_hist=True)
+
+    print(f"Start: {x0}, f = {f1(x0):.4f}")
+    print(f"FO AdaMM final x: {x_fo}, f = {f1(x_fo):.6f}")
+    print(f"ZO-AdaMM final x: {x_zo}, f = {f1(x_zo):.6f}")
+    print(f"Path shape (FO):  {hist_fo.shape}")   # (T+1, 2)
     print("True minimum: f(0,0) = 0")
