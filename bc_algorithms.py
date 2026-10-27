@@ -385,37 +385,37 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print(f"Variance: {variance}")
     print("True minimum: f(0,0) = 0")
 
-    print("---------------------------------------")
-    print("ZO-ADAMM (SINGLE PARTICLE) ON ACKLEY")
+    # print("---------------------------------------")
+    # print("ZO-ADAMM (SINGLE PARTICLE) ON ACKLEY")
 
-    def single(f):
-        return lambda x: float(f(x[None, :])[0])
+    # def single(f):
+    #     return lambda x: float(f(x[None, :])[0])
 
-    # calculation of exact gradient
-    def fo_grad(f):
-        def g(x):
-            xt = torch.tensor(x[None, :], dtype=torch.float64, requires_grad=True)
-            f(xt).sum().backward()
-            return xt.grad.numpy()[0]
-        return g
+    # # calculation of exact gradient
+    # def fo_grad(f):
+    #     def g(x):
+    #         xt = torch.tensor(x[None, :], dtype=torch.float64, requires_grad=True)
+    #         f(xt).sum().backward()
+    #         return xt.grad.numpy()[0]
+    #     return g
 
-    f1 = single(ackley)
-    x0 = np.array([20.0, 25.0]) # starting point
-    T = 1000
-    q = 10
-    zo_rng = np.random.default_rng(1) # seed
+    # f1 = single(ackley)
+    # x0 = np.array([20.0, 25.0]) # starting point
+    # T = 1000
+    # q = 10
+    # zo_rng = np.random.default_rng(1) # seed
 
-    # first-order AdaMM --> exact gradient of ackley
-    x_fo, hist_fo = zo_adamm(fo_grad(ackley), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.999, lo=-32, hi=32, return_hist=True)
+    # # first-order AdaMM --> exact gradient of ackley
+    # x_fo, hist_fo = zo_adamm(fo_grad(ackley), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.999, lo=-32, hi=32, return_hist=True)
 
-    # zeroth-order AdaMM
-    x_zo, hist_zo = zo_adamm(lambda x: zo_grad_est(f1, x, mu=1e-3, q=10, rng=zo_rng), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.3, lo=-32, hi=32, return_hist=True)
+    # # zeroth-order AdaMM
+    # x_zo, hist_zo = zo_adamm(lambda x: zo_grad_est(f1, x, mu=1e-3, q=10, rng=zo_rng), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.3, lo=-32, hi=32, return_hist=True)
 
-    print(f"Start: {x0}, f = {f1(x0):.4f}")
-    print(f"FO AdaMM final x: {x_fo}, f = {f1(x_fo):.6f}")
-    print(f"ZO-AdaMM final x: {x_zo}, f = {f1(x_zo):.6f}")
-    print(f"Path shape (FO):  {hist_fo.shape}")   # (T+1, 2)
-    print("True minimum: f(0,0) = 0")
+    # print(f"Start: {x0}, f = {f1(x0):.4f}")
+    # print(f"FO AdaMM final x: {x_fo}, f = {f1(x_fo):.6f}")
+    # print(f"ZO-AdaMM final x: {x_zo}, f = {f1(x_zo):.6f}")
+    # print(f"Path shape (FO):  {hist_fo.shape}")   # (T+1, 2)
+    # print("True minimum: f(0,0) = 0")
 
     print("---------------------------------------")
     print("ZO-ADAMM (PARTICLES) ON ACKLEY")
