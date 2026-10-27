@@ -266,7 +266,7 @@ def zo_grad_est(f, x, mu=None, q=10, rng=np.random.default_rng()):
         g += (d / mu) * (f(x + mu * u) - fx) * u
     return g / q # return single avg grad over q random directions
 
-def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1.0, beta1=0.9, beta2=0.3, v0=1e-5, T=1000, seed=0):
+def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1.0, beta1=0.9, beta2=0.3, v0=1e-5, iters=1000, seed=0): # num of iters T
     rng = np.random.default_rng(seed)
     lo, hi = domain
     x = rng.uniform(lo, hi, size=(n_particles, d))
@@ -280,7 +280,7 @@ def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1
     best_val_hist = []
     running_best = np.inf
 
-    for t in range(1, T+1): # run over 1000 trials
+    for t in range(1, iters+1): # run over 1000 trials
         f_vals = f(x)
         obj_val_hist.append(f_vals.min())
         running_best = min(running_best, f_vals.min())
@@ -301,6 +301,7 @@ def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1
     running_best = min(running_best, f_vals.min())
     # best x pos, running best obj val, part hist, ending f vals, obj val hist, running best hist
     return (x[best_idx], running_best, np.array(particle_hist), f_vals, np.array(obj_val_hist), np.array(best_val_hist))
+    # for later cbo comparison, total NFE = n_particles * iters * (q+1)
 
 
 # gradient estimation for zeroth order AdaMM (batch of random pts): noisy grad est build on fn vals
