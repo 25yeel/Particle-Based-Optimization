@@ -280,7 +280,7 @@ def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1
     best_val_hist = []
     running_best = np.inf
 
-    for t in range(1, iters+1): # run over 1000 trials
+    for t in range(1, iters+1): # run over 1000 iters
         f_vals = f(x)
         obj_val_hist.append(f_vals.min())
         running_best = min(running_best, f_vals.min())
@@ -301,7 +301,7 @@ def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1
     running_best = min(running_best, f_vals.min())
     # best x pos, running best obj val, part hist, ending f vals, obj val hist, running best hist
     return (x[best_idx], running_best, np.array(particle_hist), f_vals, np.array(obj_val_hist), np.array(best_val_hist))
-    # for later cbo comparison, total NFE = n_particles * iters * (q+1)
+    # for later cbo comparison, total NFE = n_particles * iters * (q+1) evaluations
 
 
 # gradient estimation for zeroth order AdaMM (batch of random pts): noisy grad est build on fn vals
