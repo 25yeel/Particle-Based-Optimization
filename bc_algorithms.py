@@ -223,8 +223,8 @@ def naive_uniform(f, d, domain=(-32,32), alg=cbo, seed=0):
     # return best part pos, best obj val, num of iterations
     return (x[best_idx], f_vals[best_idx], np.array(x), np.array(f_vals), len(f_vals), v)
 
-# Algorithm 1: ZO-AdaMM (Section 3 Chen paper)
-def adamm(grad_fn, x0, T=1000, alpha=0.01, beta1=0.9, beta2=0.999, v0=1e-5, lo=None, hi=None, return_hist=False):
+# Algorithm 1: ZO-AdaMM (Section 3 Chen paper) (FOR 1 PARTICLE)
+def zo_adamm(grad_fn, x0, T=1000, alpha=0.01, beta1=0.9, beta2=0.999, v0=1e-5, lo=None, hi=None, return_hist=False):
     x = x0.copy() # optimize on parameter vector x
     m = np.zeros_like(x) # momentum
     v = np.zeros_like(x) # avg of squared grads
@@ -264,6 +264,56 @@ def zo_grad_est(f, x, mu=None, q=10, rng=np.random.default_rng()):
         u /= np.linalg.norm(u) # draw rand direction uniform on the unit sphere
         # equation 1 from the paper
         g += (d / mu) * (f(x + mu * u) - fx) * u
+    return g / q # return single avg grad over q random directions
+
+def zo_adamm_batch(f, d, domain=(-32,32), n_particles=25, q=10, mu=1e-3, alpha=1.0, beta1=0.9, beta2=0.3, v0=1e-5, T=1000, seed=0):
+    rng = np.random.default_rng(seed)
+    lo, hi = domain
+    x = rng.uniform(lo, hi, size=(n_particles, d))
+
+    m = np.zeros_like(x)
+    v = np.zeros_like(x)
+    vhat = np.full_like(x, v0)
+
+    particle_hist = [x.copy()]
+    obj_val_hist = []
+    best_val_hist = []
+    running_best = np.inf
+
+    for t in range(1, T+1): # run over 1000 trials
+        f_vals = f(x)
+        obj_val_hist.append(f_vals.min())
+        running_best = min(running_best, f_vals.min())
+        best_val_hist.append(running_best)
+
+        g = zo_grad_est_batch(f, x, f_vals, mu=mu, q=q, rng=rng)
+        m = beta1 * m + (1 - beta1) * g
+        v = beta2 * v + (1 - beta2) * g**2
+        vhat = np.maximum(vhat, v) # (the AMSGrad fix: vhat never decreases)
+
+        x = x - (alpha / np.sqrt(t)) * m / np.sqrt(vhat)
+        x = np.clip(x, lo, hi)
+
+        particle_hist.append(x.copy())
+
+    f_vals = f(x)
+    best_idx = np.argmin(f_vals)
+    running_best = min(running_best, f_vals.min())
+    # best x pos, running best obj val, part hist, ending f vals, obj val hist, running best hist
+    return (x[best_idx], running_best, np.array(particle_hist), f_vals, np.array(obj_val_hist), np.array(best_val_hist))
+
+
+# gradient estimation for zeroth order AdaMM (batch of random pts): noisy grad est build on fn vals
+def zo_grad_est_batch(f, x, fx, mu=1e-3, q=10, rng=None):
+    # takes all particles, returns one grad est per particle
+    rng = rng or np.random.default_rng()
+    N, d = x.shape
+    g = np.zeros_like(x)
+    for _ in range(q):  # over q random directions
+        u = rng.standard_normal((N,d)) # only difference
+        u /= np.linalg.norm(u, axis=1, keepdims=True) # draw rand direction uniform on the unit sphere
+        # equation 1 from the paper
+        g += (d / mu) * (f(x + mu * u) - fx)[:, None] * u
     return g / q # return single avg grad over q random directions
 
 
@@ -335,7 +385,7 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print("True minimum: f(0,0) = 0")
 
     print("---------------------------------------")
-    print("ADAMM ON ACKLEY")
+    print("ZO-ADAMM (SINGLE PARTICLE) ON ACKLEY")
 
     def single(f):
         return lambda x: float(f(x[None, :])[0])
@@ -355,13 +405,27 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     zo_rng = np.random.default_rng(1) # seed
 
     # first-order AdaMM --> exact gradient of ackley
-    x_fo, hist_fo = adamm(fo_grad(ackley), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.999, lo=-32, hi=32, return_hist=True)
+    x_fo, hist_fo = zo_adamm(fo_grad(ackley), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.999, lo=-32, hi=32, return_hist=True)
 
     # zeroth-order AdaMM
-    x_zo, hist_zo = adamm(lambda x: zo_grad_est(f1, x, mu=1e-3, q=10, rng=zo_rng), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.3, lo=-32, hi=32, return_hist=True)
+    x_zo, hist_zo = zo_adamm(lambda x: zo_grad_est(f1, x, mu=1e-3, q=10, rng=zo_rng), x0, T=T, alpha=1.0, beta1=0.9, beta2=0.3, lo=-32, hi=32, return_hist=True)
 
     print(f"Start: {x0}, f = {f1(x0):.4f}")
     print(f"FO AdaMM final x: {x_fo}, f = {f1(x_fo):.6f}")
     print(f"ZO-AdaMM final x: {x_zo}, f = {f1(x_zo):.6f}")
     print(f"Path shape (FO):  {hist_fo.shape}")   # (T+1, 2)
+    print("True minimum: f(0,0) = 0")
+
+    print("---------------------------------------")
+    print("ZO-ADAMM (PARTICLES) ON ACKLEY")
+
+    N, T, q = 50, 1000, 10
+    best_x, running_best, part_hist, f_end, obj_val_hist, best_val_hist = zo_adamm_batch(ackley, d=2, n_particles=N, T=T, q=q, alpha=1.0, seed=0)
+
+    print(f"Best x position found: {best_x}")
+    print(f"Running Best f(x): {running_best:.6f}")
+    print(f"Particles ending with f < 0.1: {(f_end < 0.1).sum()}/{N}")
+    print(f"Median ending f(x): {np.median(f_end):.4f}")
+    print(f"particle_hist shape: {part_hist.shape}")          # (T+1, N, 2)
+    print(f"Function evaluations: {N * T * (q + 1) + N}")
     print("True minimum: f(0,0) = 0")
