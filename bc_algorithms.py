@@ -420,13 +420,13 @@ if __name__ == "__main__": # runs when this is the main file of this execution
     print("---------------------------------------")
     print("ZO-ADAMM (PARTICLES) ON ACKLEY")
 
-    N, iters, q = 50, 1000, 10
+    N, iters, q = 25, 1000, 10
     best_x, running_best, part_hist, f_end, obj_val_hist, best_val_hist = zo_adamm_batch(ackley, d=2, n_particles=N, iters=iters, q=q, alpha=1.0, seed=0)
 
     print(f"Best x position found: {best_x}")
     print(f"Running Best f(x): {running_best:.6f}")
     print(f"Particles ending with f < 0.1: {(f_end < 0.1).sum()}/{N}")
     print(f"Median ending f(x): {np.median(f_end):.4f}")
-    print(f"particle_hist shape: {part_hist.shape}")          # (T+1, N, 2)
+    print(f"particle_hist shape: {part_hist.shape}") # (iters+1, N, 2)
     print(f"Function evaluations: {N * iters * (q + 1) + N}")
     print("True minimum: f(0,0) = 0")
